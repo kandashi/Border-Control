@@ -235,8 +235,8 @@ class BorderFrame {
             let d = parseInt(this.data.disposition);
             if (!game.user.isGM && this.owner) return overrides.CONTROLLED;
             else if (this.actor?.hasPlayerOwner) return overrides.PARTY;
-            else if (d === CONST.TOKEN_DISPLAY_MODES.FRIENDLY) return overrides.FRIENDLY;
-            else if (d === CONST.TOKEN_DISPLAY_MODES.NEUTRAL) return overrides.NEUTRAL;
+            else if (d === TOKEN_DISPOSITIONS.FRIENDLY) return overrides.FRIENDLY;
+            else if (d === TOKEN_DISPOSITIONS.NEUTRAL) return overrides.NEUTRAL;
             else return overrides.HOSTILE;
         }
         else return null;
