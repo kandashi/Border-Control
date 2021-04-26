@@ -5,3 +5,5 @@ Can prevent borders from showing on player clients for non-owned tokens; no long
 
 
 Increased accessability for those with visibility impairments
+
+This also fixes the current disposition bug: https://gitlab.com/foundrynet/foundryvtt/-/issues/4352
