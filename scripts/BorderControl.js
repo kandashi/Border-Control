@@ -155,18 +155,16 @@ Hooks.once("ready", () => {
 
 class BorderFrame {
     static AddBorderToggle(app, html, data) {
-        const borderButton = `<div class="control-icon border" title="Toggle Border"> <i class="fas fa-border-style"></i></div>`
+        if(!game.user.isGM) return;
+        const borderButton = `<div class="control-icon border ${app.object.data.flags["Border-Control"]?.noBorder ? "active" : ""}" title="Toggle Border"> <i class="fas fa-border-style"></i></div>`
         let rightCol = html.find('.right')
         rightCol.append(borderButton)
         html.find('.border').click(this.ToggleBorder.bind(app))
     }
 
     static async ToggleBorder(event) {
-        const border = this.object.data.noBorder
-        const updates = this.layer.controlled.map(o => {
-            return { _id: o.id, noBorder: !border };
-        });
-        await this.layer.updateMany(updates);
+        const border = this.object.getFlag("Border-Control", "noBorder")
+        await this.object.setFlag("Border-Control", "noBorder", !border)
         event.currentTarget.classList.toggle("active", !border);
 
     }
@@ -180,7 +178,7 @@ class BorderFrame {
                 break;
             case "2": return;
         }
-        if (this.actor.getFlag("Border-Control", "noBorder")) return;
+        if (this.getFlag("Border-Control", "noBorder")) return;
         const t = game.settings.get("Border-Control", "borderWidth") || CONFIG.Canvas.objectBorderThickness;
 
         // Draw Hex border for size 1 tokens on a hex grid
