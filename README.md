@@ -8,4 +8,5 @@ Increased accessability for those with visibility impairments
 This also fixes the current disposition bug: https://gitlab.com/foundrynet/foundryvtt/-/issues/4352
 
 A border may be toggled off by using the Token HUD element here
-!BorderHUD[https://github.com/kandashi/Border-Control/blob/master/Border_Control_HUD.PNG?raw=true]
+
+![BorderHUD](https://github.com/kandashi/Border-Control/blob/master/Border_Control_HUD.PNG?raw=true)
