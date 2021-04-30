@@ -5,6 +5,10 @@ Can prevent borders from showing on player clients for non-owned tokens; no long
 
 Increased accessability for those with visibility impairments
 
+External border offset changeable. 
+
+Color gradient reads actor HP and returns a color between the two provided colors.
+
 This also fixes the current disposition bug: https://gitlab.com/foundrynet/foundryvtt/-/issues/4352
 
 A border may be toggled off by using the Token HUD element here
