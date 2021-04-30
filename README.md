@@ -7,7 +7,7 @@ Increased accessability for those with visibility impairments
 
 External border offset changeable. 
 
-Color gradient reads actor HP and returns a color between the two provided colors.
+Color gradient reads actor HP and returns a color between the two provided colors. (Currently dnd5e only)
 
 This also fixes the current disposition bug: https://gitlab.com/foundrynet/foundryvtt/-/issues/4352
 
