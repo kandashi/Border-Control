@@ -16,12 +16,51 @@ Hooks.once('init', async function () {
         default: "0",
         config: true,
     });
+
+    game.settings.register("Border-Control", "healthGradient", {
+        name: 'HP Gradient',
+        scope: 'world',
+        type: Boolean,
+        default: false,
+        config: true,
+    });
+    game.settings.register("Border-Control", "healthGradientA", {
+        name: 'HP Gradient Start',
+        scope: 'world',
+        type: String,
+        default: "#1b9421",
+        config: true,
+    });
+    game.settings.register("Border-Control", "healthGradientB", {
+        name: 'HP Gradient End',
+        scope: 'world',
+        type: String,
+        default: "#c9240a",
+        config: true,
+    });
+    game.settings.register("Border-Control", "stepLevel", {
+        name: 'Gradient Step Level',
+        hint: 'How many individual colors are part of the gradient',
+        scope: 'world',
+        type: Number,
+        default: 10,
+        config: true,
+    });
+
     game.settings.register("Border-Control", "borderWidth", {
         name: 'Border Width',
         hint: 'Override border width',
         scope: 'client',
         type: Number,
         default: 4,
+        config: true,
+    });
+    game.settings.register("Border-Control", "borderOffset", {
+        name: 'Border Offset',
+        hint: 'Customize border offset',
+        scope: 'client',
+        type: Number,
+        default: 0,
         config: true,
     });
     game.settings.register("Border-Control", "targetSize", {
@@ -52,8 +91,8 @@ Hooks.once('init', async function () {
         type: String,
         default: ".right",
         choices: {
-            ".right" : "Right",
-            ".left" : "Left",
+            ".right": "Right",
+            ".left": "Left",
         },
         config: true,
     });
@@ -165,6 +204,8 @@ Hooks.on('renderSettingsConfig', (app, el, data) => {
     let pCE = game.settings.get("Border-Control", "partyColorEx");
     let tC = game.settings.get("Border-Control", "targetColor");
     let tCE = game.settings.get("Border-Control", "targetColorEx");
+    let gS = game.settings.get("Border-Control", "healthGradientA");
+    let gE = game.settings.get("Border-Control", "healthGradientB");
     el.find('[name="Border-Control.neutralColor"]').parent().append(`<input type="color" value="${nC}" data-edit="Border-Control.neutralColor">`)
     el.find('[name="Border-Control.friendlyColor"]').parent().append(`<input type="color" value="${fC}" data-edit="Border-Control.friendlyColor">`)
     el.find('[name="Border-Control.hostileColor"]').parent().append(`<input type="color" value="${hC}" data-edit="Border-Control.hostileColor">`)
@@ -178,6 +219,9 @@ Hooks.on('renderSettingsConfig', (app, el, data) => {
     el.find('[name="Border-Control.controlledColorEx"]').parent().append(`<input type="color"value="${cCE}" data-edit="Border-Control.controlledColorEx">`)
     el.find('[name="Border-Control.partyColorEx"]').parent().append(`<input type="color"value="${pCE}" data-edit="Border-Control.partyColorEx">`)
     el.find('[name="Border-Control.targetColorEx"]').parent().append(`<input type="color"value="${tCE}" data-edit="Border-Control.targetColorEx">`)
+
+    el.find('[name="Border-Control.healthGradientA"]').parent().append(`<input type="color"value="${gS}" data-edit="Border-Control.healthGradientA">`)
+    el.find('[name="Border-Control.healthGradientB"]').parent().append(`<input type="color"value="${gE}" data-edit="Border-Control.healthGradientB">`)
 });
 
 
@@ -214,7 +258,7 @@ class BorderFrame {
     }
     static newBorder() {
         this.border.clear();
-        const borderColor = this._getBorderColor();
+        let borderColor = this._getBorderColor();
         if (!borderColor) return;
         switch (game.settings.get("Border-Control", "removeBorders")) {
             case "0": break;
@@ -224,9 +268,19 @@ class BorderFrame {
         }
         if (this.getFlag("Border-Control", "noBorder")) return;
         const t = game.settings.get("Border-Control", "borderWidth") || CONFIG.Canvas.objectBorderThickness;
+        if (game.settings.get("Border-Control", "healthGradient")){
+            const stepLevel = game.settings.get("Border-Control", "stepLevel")
+            const systemPath = BorderFrame.getActorHpPath()
+            const hpDecimal = Math.ceil(parseInt(getProperty(this, systemPath.value)/getProperty(this, systemPath.max) * stepLevel)) || 1
+            const endColor = hexToRGB(colorStringToHex(game.settings.get("Border-Control", "healthGradientA")))
+            const startColor = hexToRGB(colorStringToHex(game.settings.get("Border-Control", "healthGradientB")))
+            const colorArray = BorderFrame.interpolateColors(`rgb(${startColor[0]*255}, ${startColor[1]*255}, ${startColor[2]*255})`, `rgb(${endColor[0]*255}, ${endColor[1]*255}, ${endColor[2]*255})`, stepLevel)
+            const color = BorderFrame.rgbToHex(colorArray[hpDecimal-1])
+            borderColor.INT = parseInt(color.substr(1), 16)
 
-        // Draw Hex border for size 1 tokens on a hex grid
-        const gt = CONST.GRID_TYPES;
+        }
+            // Draw Hex border for size 1 tokens on a hex grid
+            const gt = CONST.GRID_TYPES;
         const hexTypes = [gt.HEXEVENQ, gt.HEXEVENR, gt.HEXODDQ, gt.HEXODDR];
         if (game.settings.get("Border-Control", "circleBorders")) {
             const h = Math.round(t / 2);
@@ -235,17 +289,21 @@ class BorderFrame {
             this.border.lineStyle(h, borderColor.INT, 1.0).drawCircle(this.w / 2, this.h / 2, this.w / 2 + h + t / 2);
         }
         else if (hexTypes.includes(canvas.grid.type) && (this.data.width === 1) && (this.data.height === 1)) {
-            const polygon = canvas.grid.grid.getPolygon(-1, -1, this.w + 2, this.h + 2);
+            const p = game.settings.get("Border-Control", "borderOffset")
+            const q = Math.round(p/2)
+            const polygon = canvas.grid.grid.getPolygon(-1.5-q, -1.5-q, this.w + 2+p, this.h + 2+p);
             this.border.lineStyle(t, borderColor.EX, 0.8).drawPolygon(polygon);
             this.border.lineStyle(t / 2, borderColor.INT, 1.0).drawPolygon(polygon);
         }
 
         // Otherwise Draw Square border
         else {
+            const p = game.settings.get("Border-Control", "borderOffset")
+            const q = Math.round(p/2)
             const h = Math.round(t / 2);
             const o = Math.round(h / 2);
-            this.border.lineStyle(t, borderColor.EX, 0.8).drawRoundedRect(-o, -o, this.w + h, this.h + h, 3);
-            this.border.lineStyle(h, borderColor.INT, 1.0).drawRoundedRect(-o, -o, this.w + h, this.h + h, 3);
+            this.border.lineStyle(t, borderColor.EX, 0.8).drawRoundedRect(-o-q, -o-q, this.w + h+p, this.h + h+p, 3);
+            this.border.lineStyle(h, borderColor.INT, 1.0).drawRoundedRect(-o-q, -o-q, this.w + h+p, this.h + h+p, 3);
         }
         return;
     }
@@ -362,6 +420,57 @@ class BorderFrame {
                         hw + ah, h + p + aw
                     ]);
             }
+        }
+    }
+
+    static componentToHex(c) {
+        var hex = c.toString(16);
+        return hex.length == 1 ? "0" + hex : hex;
+    }
+
+    static rgbToHex(A) {
+        return "#" + BorderFrame.componentToHex(A[0]) + BorderFrame.componentToHex(A[1]) + BorderFrame.componentToHex(A[2]);
+    }
+
+    static hexToRgb(hex) {
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
+    }
+
+
+    static interpolateColor(color1, color2, factor) {
+        if (arguments.length < 3) {
+            factor = 0.5;
+        }
+        var result = color1.slice();
+        for (var i = 0; i < 3; i++) {
+            result[i] = Math.round(result[i] + factor * (color2[i] - color1[i]));
+        }
+        return result;
+    };
+
+    // My function to interpolate between two colors completely, returning an array
+    static interpolateColors(color1, color2, steps) {
+        var stepFactor = 1 / (steps - 1),
+            interpolatedColorArray = [];
+
+        color1 = color1.match(/\d+/g).map(Number);
+        color2 = color2.match(/\d+/g).map(Number);
+
+        for (var i = 0; i < steps; i++) {
+            interpolatedColorArray.push(BorderFrame.interpolateColor(color1, color2, stepFactor * i));
+        }
+
+        return interpolatedColorArray;
+    }
+
+    static getActorHpPath(){
+        switch(game.system.id){
+            case "dnd5e" : return { value : "actor.data.data.attributes.hp.value", max: "actor.data.data.attributes.hp.max"}
         }
     }
 }
