@@ -85,9 +85,17 @@ Hooks.once('init', async function () {
         default: false,
         config: true,
     });
+    game.settings.register("Border-Control", "enableHud", {
+        name: 'Border HUD element',
+        hint: 'Add Token HUD element to disable/enable borders',
+        scope: 'world',
+        type: Boolean,
+        default: true,
+        config: true,
+    });
     game.settings.register("Border-Control", "hudPos", {
         name: 'Border Control HUD Position',
-        scope: 'client',
+        scope: 'world',
         type: String,
         default: ".right",
         choices: {
@@ -243,6 +251,7 @@ Hooks.once("ready", () => {
 class BorderFrame {
     static AddBorderToggle(app, html, data) {
         if (!game.user.isGM) return;
+        if (!game.settings.get("Border-Control", "enableHud")) return;
         const buttonPos = game.settings.get("Border-Control", "hudPos")
         const borderButton = `<div class="control-icon border ${app.object.data.flags["Border-Control"]?.noBorder ? "active" : ""}" title="Toggle Border"> <i class="fas fa-border-style"></i></div>`
         let Pos = html.find(buttonPos)
@@ -268,30 +277,31 @@ class BorderFrame {
         }
         if (this.getFlag("Border-Control", "noBorder")) return;
         const t = game.settings.get("Border-Control", "borderWidth") || CONFIG.Canvas.objectBorderThickness;
-        if (game.settings.get("Border-Control", "healthGradient")){
+        if (game.settings.get("Border-Control", "healthGradient")) {
             const stepLevel = game.settings.get("Border-Control", "stepLevel")
             const systemPath = BorderFrame.getActorHpPath()
-            const hpDecimal = Math.ceil(parseInt(getProperty(this, systemPath.value)/getProperty(this, systemPath.max) * stepLevel)) || 1
+            const hpDecimal = Math.ceil(parseInt(getProperty(this, systemPath.value) / getProperty(this, systemPath.max) * stepLevel)) || 1
             const endColor = hexToRGB(colorStringToHex(game.settings.get("Border-Control", "healthGradientA")))
             const startColor = hexToRGB(colorStringToHex(game.settings.get("Border-Control", "healthGradientB")))
-            const colorArray = BorderFrame.interpolateColors(`rgb(${startColor[0]*255}, ${startColor[1]*255}, ${startColor[2]*255})`, `rgb(${endColor[0]*255}, ${endColor[1]*255}, ${endColor[2]*255})`, stepLevel)
-            const color = BorderFrame.rgbToHex(colorArray[hpDecimal-1])
+            const colorArray = BorderFrame.interpolateColors(`rgb(${startColor[0] * 255}, ${startColor[1] * 255}, ${startColor[2] * 255})`, `rgb(${endColor[0] * 255}, ${endColor[1] * 255}, ${endColor[2] * 255})`, stepLevel)
+            const color = BorderFrame.rgbToHex(colorArray[hpDecimal - 1])
             borderColor.INT = parseInt(color.substr(1), 16)
 
         }
-            // Draw Hex border for size 1 tokens on a hex grid
-            const gt = CONST.GRID_TYPES;
+        // Draw Hex border for size 1 tokens on a hex grid
+        const gt = CONST.GRID_TYPES;
         const hexTypes = [gt.HEXEVENQ, gt.HEXEVENR, gt.HEXODDQ, gt.HEXODDR];
         if (game.settings.get("Border-Control", "circleBorders")) {
+            const p = game.settings.get("Border-Control", "borderOffset")
             const h = Math.round(t / 2);
             const o = Math.round(h / 2);
-            this.border.lineStyle(t, borderColor.EX, 0.8).drawCircle(this.w / 2, this.h / 2, this.w / 2 + t);
-            this.border.lineStyle(h, borderColor.INT, 1.0).drawCircle(this.w / 2, this.h / 2, this.w / 2 + h + t / 2);
+            this.border.lineStyle(t, borderColor.EX, 0.8).drawCircle(this.w / 2, this.h / 2, this.w / 2 + t + p);
+            this.border.lineStyle(h, borderColor.INT, 1.0).drawCircle(this.w / 2, this.h / 2, this.w / 2 + h + t / 2 + p);
         }
         else if (hexTypes.includes(canvas.grid.type) && (this.data.width === 1) && (this.data.height === 1)) {
             const p = game.settings.get("Border-Control", "borderOffset")
-            const q = Math.round(p/2)
-            const polygon = canvas.grid.grid.getPolygon(-1.5-q, -1.5-q, this.w + 2+p, this.h + 2+p);
+            const q = Math.round(p / 2)
+            const polygon = canvas.grid.grid.getPolygon(-1.5 - q, -1.5 - q, this.w + 2 + p, this.h + 2 + p);
             this.border.lineStyle(t, borderColor.EX, 0.8).drawPolygon(polygon);
             this.border.lineStyle(t / 2, borderColor.INT, 1.0).drawPolygon(polygon);
         }
@@ -299,11 +309,11 @@ class BorderFrame {
         // Otherwise Draw Square border
         else {
             const p = game.settings.get("Border-Control", "borderOffset")
-            const q = Math.round(p/2)
+            const q = Math.round(p / 2)
             const h = Math.round(t / 2);
             const o = Math.round(h / 2);
-            this.border.lineStyle(t, borderColor.EX, 0.8).drawRoundedRect(-o-q, -o-q, this.w + h+p, this.h + h+p, 3);
-            this.border.lineStyle(h, borderColor.INT, 1.0).drawRoundedRect(-o-q, -o-q, this.w + h+p, this.h + h+p, 3);
+            this.border.lineStyle(t, borderColor.EX, 0.8).drawRoundedRect(-o - q, -o - q, this.w + h + p, this.h + h + p, 3);
+            this.border.lineStyle(h, borderColor.INT, 1.0).drawRoundedRect(-o - q, -o - q, this.w + h + p, this.h + h + p, 3);
         }
         return;
     }
@@ -429,6 +439,7 @@ class BorderFrame {
     }
 
     static rgbToHex(A) {
+        if (A[0] === undefined || A[1] === undefined || A[2] === undefined) console.error("RGB color invalid")
         return "#" + BorderFrame.componentToHex(A[0]) + BorderFrame.componentToHex(A[1]) + BorderFrame.componentToHex(A[2]);
     }
 
@@ -468,9 +479,9 @@ class BorderFrame {
         return interpolatedColorArray;
     }
 
-    static getActorHpPath(){
-        switch(game.system.id){
-            case "dnd5e" : return { value : "actor.data.data.attributes.hp.value", max: "actor.data.data.attributes.hp.max"}
+    static getActorHpPath() {
+        switch (game.system.id) {
+            case "dnd5e": return { value: "actor.data.data.attributes.hp.value", max: "actor.data.data.attributes.hp.max" }
         }
     }
 }
