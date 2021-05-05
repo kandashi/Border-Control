@@ -24,6 +24,13 @@ Hooks.once('init', async function () {
         default: false,
         config: true,
     });
+    game.settings.register("Border-Control", "tempHPgradient", {
+        name: 'Gradient TempHP Enable',
+        scope: 'world',
+        type: Boolean,
+        default: false,
+        config: true,
+    });
     game.settings.register("Border-Control", "healthGradientA", {
         name: 'HP Gradient Start',
         scope: 'world',
@@ -38,6 +45,15 @@ Hooks.once('init', async function () {
         default: "#c9240a",
         config: true,
     });
+
+    game.settings.register("Border-Control", "healthGradientC", {
+        name: 'HP Gradient TempHP',
+        scope: 'world',
+        type: String,
+        default: "#22e3dd",
+        config: true,
+    });
+
     game.settings.register("Border-Control", "stepLevel", {
         name: 'Gradient Step Level',
         hint: 'How many individual colors are part of the gradient',
@@ -85,9 +101,17 @@ Hooks.once('init', async function () {
         default: false,
         config: true,
     });
+    game.settings.register("Border-Control", "enableHud", {
+        name: 'Border HUD element',
+        hint: 'Add Token HUD element to disable/enable borders',
+        scope: 'world',
+        type: Boolean,
+        default: true,
+        config: true,
+    });
     game.settings.register("Border-Control", "hudPos", {
         name: 'Border Control HUD Position',
-        scope: 'client',
+        scope: 'world',
         type: String,
         default: ".right",
         choices: {
@@ -206,6 +230,7 @@ Hooks.on('renderSettingsConfig', (app, el, data) => {
     let tCE = game.settings.get("Border-Control", "targetColorEx");
     let gS = game.settings.get("Border-Control", "healthGradientA");
     let gE = game.settings.get("Border-Control", "healthGradientB");
+    let gT = game.settings.get("Border-Control", "healthGradientC");
     el.find('[name="Border-Control.neutralColor"]').parent().append(`<input type="color" value="${nC}" data-edit="Border-Control.neutralColor">`)
     el.find('[name="Border-Control.friendlyColor"]').parent().append(`<input type="color" value="${fC}" data-edit="Border-Control.friendlyColor">`)
     el.find('[name="Border-Control.hostileColor"]').parent().append(`<input type="color" value="${hC}" data-edit="Border-Control.hostileColor">`)
@@ -222,6 +247,8 @@ Hooks.on('renderSettingsConfig', (app, el, data) => {
 
     el.find('[name="Border-Control.healthGradientA"]').parent().append(`<input type="color"value="${gS}" data-edit="Border-Control.healthGradientA">`)
     el.find('[name="Border-Control.healthGradientB"]').parent().append(`<input type="color"value="${gE}" data-edit="Border-Control.healthGradientB">`)
+    el.find('[name="Border-Control.healthGradientC"]').parent().append(`<input type="color"value="${gT}" data-edit="Border-Control.healthGradientC">`)
+
 });
 
 
@@ -243,6 +270,7 @@ Hooks.once("ready", () => {
 class BorderFrame {
     static AddBorderToggle(app, html, data) {
         if (!game.user.isGM) return;
+        if (!game.settings.get("Border-Control", "enableHud")) return;
         const buttonPos = game.settings.get("Border-Control", "hudPos")
         const borderButton = `<div class="control-icon border ${app.object.data.flags["Border-Control"]?.noBorder ? "active" : ""}" title="Toggle Border"> <i class="fas fa-border-style"></i></div>`
         let Pos = html.find(buttonPos)
@@ -268,30 +296,41 @@ class BorderFrame {
         }
         if (this.getFlag("Border-Control", "noBorder")) return;
         const t = game.settings.get("Border-Control", "borderWidth") || CONFIG.Canvas.objectBorderThickness;
-        if (game.settings.get("Border-Control", "healthGradient")){
+        if (game.settings.get("Border-Control", "healthGradient")) {
             const stepLevel = game.settings.get("Border-Control", "stepLevel")
             const systemPath = BorderFrame.getActorHpPath()
-            const hpDecimal = Math.ceil(parseInt(getProperty(this, systemPath.value)/getProperty(this, systemPath.max) * stepLevel)) || 1
+            const hpMax = getProperty(this, systemPath.max) + getProperty(this, systemPath.tempMax)
+            const hpValue = getProperty(this, systemPath.value)
+            const tempValue = getProperty(this, systemPath.temp)
+            const hpDecimal = BorderFrame.clamp((hpValue / hpMax) * stepLevel, stepLevel, 1)
+            const tempDecimal = BorderFrame.clamp(tempValue / (hpMax / 2) * stepLevel, stepLevel, 1)
             const endColor = hexToRGB(colorStringToHex(game.settings.get("Border-Control", "healthGradientA")))
             const startColor = hexToRGB(colorStringToHex(game.settings.get("Border-Control", "healthGradientB")))
-            const colorArray = BorderFrame.interpolateColors(`rgb(${startColor[0]*255}, ${startColor[1]*255}, ${startColor[2]*255})`, `rgb(${endColor[0]*255}, ${endColor[1]*255}, ${endColor[2]*255})`, stepLevel)
-            const color = BorderFrame.rgbToHex(colorArray[hpDecimal-1])
+            const tempColor = hexToRGB(colorStringToHex(game.settings.get("Border-Control", "healthGradientC")))
+            const colorArray = BorderFrame.interpolateColors(`rgb(${startColor[0] * 255}, ${startColor[1] * 255}, ${startColor[2] * 255})`, `rgb(${endColor[0] * 255}, ${endColor[1] * 255}, ${endColor[2] * 255})`, stepLevel)
+            const tempArray = BorderFrame.interpolateColors(`rgb(${endColor[0] * 255}, ${endColor[1] * 255}, ${endColor[2] * 255})`, `rgb(${tempColor[0] * 255}, ${tempColor[1] * 255}, ${tempColor[2] * 255})`, stepLevel)
+            const tempEx = BorderFrame.rgbToHex(tempArray[tempDecimal - 1])
+            const color = BorderFrame.rgbToHex(colorArray[hpDecimal - 1])
             borderColor.INT = parseInt(color.substr(1), 16)
+            if (game.settings.get("Border-Control", "tempHPgradient") && getProperty(this, systemPath.temp) > 0) {
+                borderColor.EX = parseInt(tempEx.substr(1), 16)
+            }
 
         }
-            // Draw Hex border for size 1 tokens on a hex grid
-            const gt = CONST.GRID_TYPES;
+        // Draw Hex border for size 1 tokens on a hex grid
+        const gt = CONST.GRID_TYPES;
         const hexTypes = [gt.HEXEVENQ, gt.HEXEVENR, gt.HEXODDQ, gt.HEXODDR];
         if (game.settings.get("Border-Control", "circleBorders")) {
+            const p = game.settings.get("Border-Control", "borderOffset")
             const h = Math.round(t / 2);
             const o = Math.round(h / 2);
-            this.border.lineStyle(t, borderColor.EX, 0.8).drawCircle(this.w / 2, this.h / 2, this.w / 2 + t);
-            this.border.lineStyle(h, borderColor.INT, 1.0).drawCircle(this.w / 2, this.h / 2, this.w / 2 + h + t / 2);
+            this.border.lineStyle(t, borderColor.EX, 0.8).drawCircle(this.w / 2, this.h / 2, this.w / 2 + t + p);
+            this.border.lineStyle(h, borderColor.INT, 1.0).drawCircle(this.w / 2, this.h / 2, this.w / 2 + h + t / 2 + p);
         }
         else if (hexTypes.includes(canvas.grid.type) && (this.data.width === 1) && (this.data.height === 1)) {
             const p = game.settings.get("Border-Control", "borderOffset")
-            const q = Math.round(p/2)
-            const polygon = canvas.grid.grid.getPolygon(-1.5-q, -1.5-q, this.w + 2+p, this.h + 2+p);
+            const q = Math.round(p / 2)
+            const polygon = canvas.grid.grid.getPolygon(-1.5 - q, -1.5 - q, this.w + 2 + p, this.h + 2 + p);
             this.border.lineStyle(t, borderColor.EX, 0.8).drawPolygon(polygon);
             this.border.lineStyle(t / 2, borderColor.INT, 1.0).drawPolygon(polygon);
         }
@@ -299,15 +338,18 @@ class BorderFrame {
         // Otherwise Draw Square border
         else {
             const p = game.settings.get("Border-Control", "borderOffset")
-            const q = Math.round(p/2)
+            const q = Math.round(p / 2)
             const h = Math.round(t / 2);
             const o = Math.round(h / 2);
-            this.border.lineStyle(t, borderColor.EX, 0.8).drawRoundedRect(-o-q, -o-q, this.w + h+p, this.h + h+p, 3);
-            this.border.lineStyle(h, borderColor.INT, 1.0).drawRoundedRect(-o-q, -o-q, this.w + h+p, this.h + h+p, 3);
+            this.border.lineStyle(t, borderColor.EX, 0.8).drawRoundedRect(-o - q, -o - q, this.w + h + p, this.h + h + p, 3);
+            this.border.lineStyle(h, borderColor.INT, 1.0).drawRoundedRect(-o - q, -o - q, this.w + h + p, this.h + h + p, 3);
         }
         return;
     }
 
+    static clamp(value, max, min) {
+        return Math.min(Math.max(value, min), max);
+    }
     static newBorderColor() {
 
         const overrides = {
@@ -429,6 +471,7 @@ class BorderFrame {
     }
 
     static rgbToHex(A) {
+        if (A[0] === undefined || A[1] === undefined || A[2] === undefined) console.error("RGB color invalid")
         return "#" + BorderFrame.componentToHex(A[0]) + BorderFrame.componentToHex(A[1]) + BorderFrame.componentToHex(A[2]);
     }
 
@@ -468,9 +511,14 @@ class BorderFrame {
         return interpolatedColorArray;
     }
 
-    static getActorHpPath(){
-        switch(game.system.id){
-            case "dnd5e" : return { value : "actor.data.data.attributes.hp.value", max: "actor.data.data.attributes.hp.max"}
+    static getActorHpPath() {
+        switch (game.system.id) {
+            case "dnd5e": return {
+                value: "actor.data.data.attributes.hp.value",
+                max: "actor.data.data.attributes.hp.max",
+                tempMax: "actor.data.data.attributes.hp.tempmax",
+                temp: "actor.data.data.attributes.hp.temp"
+            }
         }
     }
 }
