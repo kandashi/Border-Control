@@ -24,6 +24,13 @@ Hooks.once('init', async function () {
         default: false,
         config: true,
     });
+    game.settings.register("Border-Control", "tempHPgradient", {
+        name: 'Gradient TempHP Enable',
+        scope: 'world',
+        type: Boolean,
+        default: false,
+        config: true,
+    });
     game.settings.register("Border-Control", "healthGradientA", {
         name: 'HP Gradient Start',
         scope: 'world',
@@ -38,6 +45,15 @@ Hooks.once('init', async function () {
         default: "#c9240a",
         config: true,
     });
+
+    game.settings.register("Border-Control", "healthGradientC", {
+        name: 'HP Gradient TempHP',
+        scope: 'world',
+        type: String,
+        default: "#22e3dd",
+        config: true,
+    });
+
     game.settings.register("Border-Control", "stepLevel", {
         name: 'Gradient Step Level',
         hint: 'How many individual colors are part of the gradient',
@@ -214,6 +230,7 @@ Hooks.on('renderSettingsConfig', (app, el, data) => {
     let tCE = game.settings.get("Border-Control", "targetColorEx");
     let gS = game.settings.get("Border-Control", "healthGradientA");
     let gE = game.settings.get("Border-Control", "healthGradientB");
+    let gT = game.settings.get("Border-Control", "healthGradientC");
     el.find('[name="Border-Control.neutralColor"]').parent().append(`<input type="color" value="${nC}" data-edit="Border-Control.neutralColor">`)
     el.find('[name="Border-Control.friendlyColor"]').parent().append(`<input type="color" value="${fC}" data-edit="Border-Control.friendlyColor">`)
     el.find('[name="Border-Control.hostileColor"]').parent().append(`<input type="color" value="${hC}" data-edit="Border-Control.hostileColor">`)
@@ -230,6 +247,8 @@ Hooks.on('renderSettingsConfig', (app, el, data) => {
 
     el.find('[name="Border-Control.healthGradientA"]').parent().append(`<input type="color"value="${gS}" data-edit="Border-Control.healthGradientA">`)
     el.find('[name="Border-Control.healthGradientB"]').parent().append(`<input type="color"value="${gE}" data-edit="Border-Control.healthGradientB">`)
+    el.find('[name="Border-Control.healthGradientC"]').parent().append(`<input type="color"value="${gT}" data-edit="Border-Control.healthGradientC">`)
+
 });
 
 
@@ -280,12 +299,22 @@ class BorderFrame {
         if (game.settings.get("Border-Control", "healthGradient")) {
             const stepLevel = game.settings.get("Border-Control", "stepLevel")
             const systemPath = BorderFrame.getActorHpPath()
-            const hpDecimal = Math.ceil(parseInt(getProperty(this, systemPath.value) / getProperty(this, systemPath.max) * stepLevel)) || 1
+            const hpMax = getProperty(this, systemPath.max) + getProperty(this, systemPath.tempMax)
+            const hpValue = getProperty(this, systemPath.value)
+            const tempValue = getProperty(this, systemPath.temp)
+            const hpDecimal = BorderFrame.clamp((hpValue / hpMax) * stepLevel, stepLevel, 1)
+            const tempDecimal = BorderFrame.clamp(tempValue / (hpMax / 2) * stepLevel, stepLevel, 1)
             const endColor = hexToRGB(colorStringToHex(game.settings.get("Border-Control", "healthGradientA")))
             const startColor = hexToRGB(colorStringToHex(game.settings.get("Border-Control", "healthGradientB")))
+            const tempColor = hexToRGB(colorStringToHex(game.settings.get("Border-Control", "healthGradientC")))
             const colorArray = BorderFrame.interpolateColors(`rgb(${startColor[0] * 255}, ${startColor[1] * 255}, ${startColor[2] * 255})`, `rgb(${endColor[0] * 255}, ${endColor[1] * 255}, ${endColor[2] * 255})`, stepLevel)
+            const tempArray = BorderFrame.interpolateColors(`rgb(${endColor[0] * 255}, ${endColor[1] * 255}, ${endColor[2] * 255})`, `rgb(${tempColor[0] * 255}, ${tempColor[1] * 255}, ${tempColor[2] * 255})`, stepLevel)
+            const tempEx = BorderFrame.rgbToHex(tempArray[tempDecimal - 1])
             const color = BorderFrame.rgbToHex(colorArray[hpDecimal - 1])
             borderColor.INT = parseInt(color.substr(1), 16)
+            if (game.settings.get("Border-Control", "tempHPgradient") && getProperty(this, systemPath.temp) > 0) {
+                borderColor.EX = parseInt(tempEx.substr(1), 16)
+            }
 
         }
         // Draw Hex border for size 1 tokens on a hex grid
@@ -318,6 +347,9 @@ class BorderFrame {
         return;
     }
 
+    static clamp(value, max, min) {
+        return Math.min(Math.max(value, min), max);
+    }
     static newBorderColor() {
 
         const overrides = {
@@ -481,7 +513,12 @@ class BorderFrame {
 
     static getActorHpPath() {
         switch (game.system.id) {
-            case "dnd5e": return { value: "actor.data.data.attributes.hp.value", max: "actor.data.data.attributes.hp.max" }
+            case "dnd5e": return {
+                value: "actor.data.data.attributes.hp.value",
+                max: "actor.data.data.attributes.hp.max",
+                tempMax: "actor.data.data.attributes.hp.tempmax",
+                temp: "actor.data.data.attributes.hp.temp"
+            }
         }
     }
 }
