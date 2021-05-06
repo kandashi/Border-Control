@@ -129,6 +129,14 @@ Hooks.once('init', async function () {
         default: false,
         config: true,
     });
+    game.settings.register("Border-Control", "circularNameplateRadius", {
+        name: 'Circular Nameplates Radius',
+        hint: "Requires a refresh",
+        scope: 'world',
+        type: Number,
+        default: 0,
+        config: true,
+    });
     game.settings.register("Border-Control", "nameplateOffset", {
         name: 'Nameplate Y Offset',
         hint: "Requires a refresh",
@@ -161,7 +169,7 @@ Hooks.once('init', async function () {
         config: true,
     });
     game.settings.register("Border-Control", "sizeMultiplier", {
-        name: 'Nameplate Font',
+        name: 'Nameplate Font Size',
         hint: "Requires a refresh",
         scope: 'world',
         type: Number,
@@ -583,6 +591,7 @@ class BorderFrame {
 
         if (game.settings.get("Border-Control", "circularNameplate")) {
             let style = CONFIG.canvasTextStyle.clone()
+            let extraRad = game.settings.register("Border-Control", "circularNameplateRadius")
             if (!game.modules.get("custom-nameplates")?.active) {
                 style.fontFamily = replaceFont
                 style.fontSize *= sizeMulti
@@ -592,7 +601,7 @@ class BorderFrame {
             text.style.trim = true;
             text.updateText();
 
-            var radius = this.w / 2 + text.texture.height + bOff;
+            var radius = this.w / 2 + text.texture.height + bOff + extraRad; 
             var maxRopePoints = 100;
             var step = Math.PI / maxRopePoints;
 
