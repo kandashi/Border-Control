@@ -4,7 +4,7 @@
   "description": "Control your tokens borders. Player side configuration of the tokens borders, color and scale. Can prevent borders from showing on player clients for non-owned tokens; no longer hide your mimics behind tiles! Increased accessability for those with visibility impairments",
   "version": "This is auto replaced",
   "library": "false",
-  "manifestPlusVersion": "1.0.7",
+  "manifestPlusVersion": "1.0.8",
   "minimumCoreVersion": "0.7.9",
   "compatibleCoreVersion": "0.7.9",
   "authors": [

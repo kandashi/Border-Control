@@ -120,6 +120,56 @@ Hooks.once('init', async function () {
         },
         config: true,
     });
+
+    game.settings.register("Border-Control", "circularNameplate", {
+        name: 'Circular Nameplates',
+        hint: "Requires a refresh",
+        scope: 'world',
+        type: Boolean,
+        default: false,
+        config: true,
+    });
+    game.settings.register("Border-Control", "nameplateOffset", {
+        name: 'Nameplate Y Offset',
+        hint: "Requires a refresh",
+        scope: 'world',
+        type: Number,
+        default: 0,
+        config: true,
+    });
+
+    game.settings.register("Border-Control", "plateFont", {
+        name: 'Nameplate Font',
+        hint: "Requires a refresh",
+        scope: 'world',
+        type: String,
+        choices: {
+            "arial" : "Arial",
+            "arial black" : "Arial Black",
+            "signika" : "Signika",
+            "comic sans ms" : "Comic Sans MS",
+            "courier new" : "Courier New",
+            "georgia" : "Georgia",
+            "helvetica" : "Helvetica",
+            "impact"  : "Impact",
+            "signika"  : "Signika",
+            "tahoma" : "Tahoma",
+            "times new roman" : "Times New Roman",
+            "verdana" : "Verdana"
+        },
+        default: "signika",
+        config: true,
+    });
+    game.settings.register("Border-Control", "sizeMultiplier", {
+        name: 'Nameplate Font',
+        hint: "Requires a refresh",
+        scope: 'world',
+        type: Number,
+        default: 1,
+        config: true,
+    });
+
+
     game.settings.register("Border-Control", "controlledColor", {
         name: 'Color: Controlled',
         scope: 'client',
@@ -208,8 +258,10 @@ Hooks.once('init', async function () {
 
     libWrapper.register('Border-Control', 'Token.prototype._refreshBorder', BorderFrame.newBorder, 'OVERRIDE')
     libWrapper.register('Border-Control', 'Token.prototype._getBorderColor', BorderFrame.newBorderColor, 'OVERRIDE')
-    libWrapper.register('Border-Control', 'Token.prototype._refreshTarget', BorderFrame.newTarget, 'OVERRIDE')
-
+    if (!game.modules.get('better-target')?.active) {
+        libWrapper.register('Border-Control', 'Token.prototype._refreshTarget', BorderFrame.newTarget, 'OVERRIDE')
+    }
+    libWrapper.register('Border-Control', 'Token.prototype._drawNameplate', BorderFrame.drawNameplate, 'OVERRIDE')
 });
 
 Hooks.on('renderTokenHUD', (app, html, data) => {
@@ -520,5 +572,59 @@ class BorderFrame {
                 temp: "actor.data.data.attributes.hp.temp"
             }
         }
+    }
+
+    static drawNameplate() {
+        const offSet = game.settings.get("Border-Control", "borderOffset")
+        const yOff = game.settings.get("Border-Control", "nameplateOffset")
+        const bOff = game.settings.get("Border-Control", "borderWidth") / 2
+        const replaceFont = game.settings.get("Border-Control", "plateFont")
+        const sizeMulti = game.settings.get("Border-Control", "sizeMultiplier")
+
+        if (game.settings.get("Border-Control", "circularNameplate")) {
+            let style = CONFIG.canvasTextStyle.clone()
+            if (!game.modules.get("custom-nameplates")?.active) {
+                style.fontFamily = replaceFont
+                style.fontSize *= sizeMulti
+            }
+            var text = new PreciseText(this.name, style);
+            text.resolution = 2;
+            text.style.trim = true;
+            text.updateText();
+
+            var radius = this.w / 2 + text.texture.height + bOff;
+            var maxRopePoints = 100;
+            var step = Math.PI / maxRopePoints;
+
+            var ropePoints = maxRopePoints - Math.round((text.texture.width / (radius * Math.PI)) * maxRopePoints);
+            ropePoints /= 2;
+
+            var points = [];
+            for (var i = maxRopePoints - ropePoints; i > ropePoints; i--) {
+                var x = radius * Math.cos(step * i);
+                var y = radius * Math.sin(step * i);
+                points.push(new PIXI.Point(-x, -y));
+            }
+            const name = new PIXI.SimpleRope(text.texture, points);
+            name.rotation = Math.PI
+            name.position.set(this.w / 2, this.h / 2 + yOff)
+            return name;
+        }
+        else {
+            const style = this._getTextStyle();
+            if (!game.modules.get("custom-nameplates")?.active) {
+                style.fontFamily = game.settings.get("Border-Control", "plateFont")
+                style.fontSize *= sizeMulti 
+            }
+            const name = new PreciseText(this.data.name, style);
+            name.anchor.set(0.5, 0);
+            name.position.set(this.w / 2, this.h + bOff + yOff + offSet);
+            return name;
+        }
+        
+    }
+
+    static refreshAll(){
+        canvas.tokens.placeables.forEach(t => t.draw())
     }
 }
