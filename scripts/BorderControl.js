@@ -161,7 +161,7 @@ Hooks.once('init', async function () {
         config: true,
     });
     game.settings.register("Border-Control", "sizeMultiplier", {
-        name: 'Nameplate Font',
+        name: 'Nameplate Font Size',
         hint: "Requires a refresh",
         scope: 'world',
         type: Number,
