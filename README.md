@@ -12,6 +12,10 @@ Temp HP gradient moves up from the "full hp" color towards a defined color, maxi
 
 This also fixes the current disposition bug: https://gitlab.com/foundrynet/foundryvtt/-/issues/4352
 
+Nameplates are now customizable, change the size, vertical offset and font. You can also make then circular, to fit with POG style tokens
+Available fonts are: Arial, Arial Black, Comic Sans MS, Courier New, Georgia, Helvetica, Impact, Tahoma, Times New Roman and Verdana.
+
+
 A border may be toggled off by using the Token HUD element here
 
 ![BorderHUD](https://github.com/kandashi/Border-Control/blob/master/Border_Control_HUD.PNG?raw=true)
