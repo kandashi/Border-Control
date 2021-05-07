@@ -591,7 +591,7 @@ class BorderFrame {
 
         if (game.settings.get("Border-Control", "circularNameplate")) {
             let style = CONFIG.canvasTextStyle.clone()
-            let extraRad = game.settings.register("Border-Control", "circularNameplateRadius")
+            let extraRad = game.settings.get("Border-Control", "circularNameplateRadius")
             if (!game.modules.get("custom-nameplates")?.active) {
                 style.fontFamily = replaceFont
                 style.fontSize *= sizeMulti
