@@ -423,7 +423,7 @@ class BorderFrame {
             },
             NEUTRAL: {
                 INT: parseInt(game.settings.get("Border-Control", "neutralColor").substr(1), 16),
-                EXT: parseInt(game.settings.get("Border-Control", "neutralColorEx").substr(1), 16),
+                EX: parseInt(game.settings.get("Border-Control", "neutralColorEx").substr(1), 16),
             },
             HOSTILE: {
                 INT: parseInt(game.settings.get("Border-Control", "hostileColor").substr(1), 16),
