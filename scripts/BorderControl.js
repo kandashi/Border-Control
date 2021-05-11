@@ -436,11 +436,12 @@ class BorderFrame {
         }
         if (this._controlled) return overrides.CONTROLLED;
         else if (this._hover) {
+            let disPath = isNewerVersion(game.data.version, "0.8.0") ? CONST.TOKEN_DISPOSITIONS : TOKEN_DISPOSITIONS
             let d = parseInt(this.data.disposition);
             if (!game.user.isGM && this.owner) return overrides.CONTROLLED;
             else if (this.actor?.hasPlayerOwner) return overrides.PARTY;
-            else if (d === TOKEN_DISPOSITIONS.FRIENDLY) return overrides.FRIENDLY;
-            else if (d === TOKEN_DISPOSITIONS.NEUTRAL) return overrides.NEUTRAL;
+            else if (d === disPath.FRIENDLY) return overrides.FRIENDLY;
+            else if (d === disPath.NEUTRAL) return overrides.NEUTRAL;
             else return overrides.HOSTILE;
         }
         else return null;
