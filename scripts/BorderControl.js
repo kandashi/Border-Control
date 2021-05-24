@@ -152,18 +152,18 @@ Hooks.once('init', async function () {
         scope: 'world',
         type: String,
         choices: {
-            "arial" : "Arial",
-            "arial black" : "Arial Black",
-            "signika" : "Signika",
-            "comic sans ms" : "Comic Sans MS",
-            "courier new" : "Courier New",
-            "georgia" : "Georgia",
-            "helvetica" : "Helvetica",
-            "impact"  : "Impact",
-            "signika"  : "Signika",
-            "tahoma" : "Tahoma",
-            "times new roman" : "Times New Roman",
-            "verdana" : "Verdana"
+            "arial": "Arial",
+            "arial black": "Arial Black",
+            "signika": "Signika",
+            "comic sans ms": "Comic Sans MS",
+            "courier new": "Courier New",
+            "georgia": "Georgia",
+            "helvetica": "Helvetica",
+            "impact": "Impact",
+            "signika": "Signika",
+            "tahoma": "Tahoma",
+            "times new roman": "Times New Roman",
+            "verdana": "Verdana"
         },
         default: "signika",
         config: true,
@@ -176,7 +176,14 @@ Hooks.once('init', async function () {
         default: 1,
         config: true,
     });
-
+    game.settings.register("Border-Control", "plateConsistency", {
+        name: 'Nameplate Consistency',
+        hint: "Attempts to keep nameplates the same size across different grid sizes",
+        scope: 'world',
+        type: Boolean,
+        default: false,
+        config: true,
+    });
 
     game.settings.register("Border-Control", "controlledColor", {
         name: 'Color: Controlled',
@@ -524,6 +531,11 @@ class BorderFrame {
                     ]);
             }
         }
+        // For other users, draw offset pips
+        for (let [i, u] of others.entries()) {
+            let color = colorStringToHex(u.data.color);
+            this.target.beginFill(color, 1.0).lineStyle(2, 0x0000000).drawCircle(2 + (i * 8), 0, 6);
+        }
     }
 
     static componentToHex(c) {
@@ -596,13 +608,14 @@ class BorderFrame {
             if (!game.modules.get("custom-nameplates")?.active) {
                 style.fontFamily = replaceFont
                 style.fontSize *= sizeMulti
+                if (game.settings.get("Border-Control", "plateConsistency")) style.fontSize *= canvas.grid.size / 100
             }
             var text = new PreciseText(this.name, style);
             text.resolution = 2;
             text.style.trim = true;
             text.updateText();
 
-            var radius = this.w / 2 + text.texture.height + bOff + extraRad; 
+            var radius = this.w / 2 + text.texture.height + bOff + extraRad;
             var maxRopePoints = 100;
             var step = Math.PI / maxRopePoints;
 
@@ -624,17 +637,17 @@ class BorderFrame {
             const style = this._getTextStyle();
             if (!game.modules.get("custom-nameplates")?.active) {
                 style.fontFamily = game.settings.get("Border-Control", "plateFont")
-                style.fontSize *= sizeMulti 
+                style.fontSize *= sizeMulti
             }
             const name = new PreciseText(this.data.name, style);
             name.anchor.set(0.5, 0);
             name.position.set(this.w / 2, this.h + bOff + yOff + offSet);
             return name;
         }
-        
+
     }
 
-    static refreshAll(){
+    static refreshAll() {
         canvas.tokens.placeables.forEach(t => t.draw())
     }
 }
