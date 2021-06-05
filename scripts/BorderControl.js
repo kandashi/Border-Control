@@ -346,8 +346,8 @@ class BorderFrame {
     }
 
     static async ToggleBorder(event) {
-        const border = this.object.getFlag("Border-Control", "noBorder")
-        await this.object.setFlag("Border-Control", "noBorder", !border)
+        const border = this.object.document.getFlag("Border-Control", "noBorder")
+        await this.object.document.setFlag("Border-Control", "noBorder", !border)
         event.currentTarget.classList.toggle("active", !border);
 
     }
@@ -361,7 +361,7 @@ class BorderFrame {
                 break;
             case "2": return;
         }
-        if (this.getFlag("Border-Control", "noBorder")) return;
+        if (this.data.flags["Border-Control"]?.noBorder) return;
         const t = game.settings.get("Border-Control", "borderWidth") || CONFIG.Canvas.objectBorderThickness;
         if (game.settings.get("Border-Control", "healthGradient")) {
             const stepLevel = game.settings.get("Border-Control", "stepLevel")
