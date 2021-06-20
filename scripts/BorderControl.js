@@ -269,11 +269,18 @@ Hooks.once('init', async function () {
         default: "#000000",
         config: true,
     });
-
+    game.settings.register("Border-Control", "disableRefreshTarget", {
+        name: 'Disable the refresh target feature',
+        hint: 'Use other module like Better Target, Smart Target, ecc. for apply design to target',
+        scope: 'world',
+        type: Boolean,
+        default: false,
+        config: true,
+    });
 
     libWrapper.register('Border-Control', 'Token.prototype._refreshBorder', BorderFrame.newBorder, 'OVERRIDE')
     libWrapper.register('Border-Control', 'Token.prototype._getBorderColor', BorderFrame.newBorderColor, 'OVERRIDE')
-    if (!game.modules.get('better-target')?.active) {
+    if (!game.settings.get("Border-Control", "disableRefreshTarget")) {
         libWrapper.register('Border-Control', 'Token.prototype._refreshTarget', BorderFrame.newTarget, 'OVERRIDE')
     }
     libWrapper.register('Border-Control', 'Token.prototype._drawNameplate', BorderFrame.drawNameplate, 'OVERRIDE')
