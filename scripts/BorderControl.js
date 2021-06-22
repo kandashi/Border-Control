@@ -1,8 +1,7 @@
 
 import { libWrapper } from './shim.js';
-
+let BCC;
 Hooks.once('init', async function () {
-
     game.settings.register("Border-Control", "removeBorders", {
         name: 'Remove Borders',
         hint: 'Remove the border from specific tokens',
@@ -286,9 +285,47 @@ Hooks.once('init', async function () {
     libWrapper.register('Border-Control', 'Token.prototype._drawNameplate', BorderFrame.drawNameplate, 'OVERRIDE')
 });
 
+Hooks.on("ready", () => BCC = new BCconfig())
 Hooks.on('renderTokenHUD', (app, html, data) => {
     BorderFrame.AddBorderToggle(app, html, data)
 })
+
+class BCconfig {
+    constructor() {
+        this.symbaroum = {
+            value: "actor.data.data.health.toughness.value",
+            max: "actor.data.data.health.toughness.max",
+            tempMax: undefined,
+            temp: undefined
+        }
+        this.dnd5e = {
+            value: "actor.data.data.attributes.hp.value",
+            max: "actor.data.data.attributes.hp.max",
+            tempMax: undefined,
+            temp: "actor.data.data.attributes.hp.temp"
+        }
+        this.pf2e = {
+            value: "actor.data.data.attributes.hp.value",
+            max: "actor.data.data.attributes.hp.max",
+            tempMax: "actor.data.data.attributes.hp.tempmax",
+            temp: "actor.data.data.attributes.hp.temp"
+        }
+        this.swade = {
+            value: "actor.data.data.wounds.value",
+            max: "actor.data.data.wounds.max",
+            tempMax: undefined,
+            temp: undefined
+        }
+        this.stepLevel = game.settings.get("Border-Control", "stepLevel")
+        this.endColor = hexToRGB(colorStringToHex(game.settings.get("Border-Control", "healthGradientA")))
+        this.startColor = hexToRGB(colorStringToHex(game.settings.get("Border-Control", "healthGradientB")))
+        this.tempColor = hexToRGB(colorStringToHex(game.settings.get("Border-Control", "healthGradientC")))
+        this.colorArray = BorderFrame.interpolateColors(`rgb(${this.startColor[0] * 255}, ${this.startColor[1] * 255}, ${this.startColor[2] * 255})`, `rgb(${this.endColor[0] * 255}, ${this.endColor[1] * 255}, ${this.endColor[2] * 255})`, this.stepLevel)
+        this.tempArray = BorderFrame.interpolateColors(`rgb(${this.endColor[0] * 255}, ${this.endColor[1] * 255}, ${this.endColor[2] * 255})`, `rgb(${this.tempColor[0] * 255}, ${this.tempColor[1] * 255}, ${this.tempColor[2] * 255})`, this.stepLevel)
+
+        this.currentSystem = this[game.system.id]
+    }
+}
 Hooks.on('renderSettingsConfig', (app, el, data) => {
     let nC = game.settings.get("Border-Control", "neutralColor");
     let fC = game.settings.get("Border-Control", "friendlyColor");
@@ -371,22 +408,17 @@ class BorderFrame {
         if (this.data.flags["Border-Control"]?.noBorder) return;
         const t = game.settings.get("Border-Control", "borderWidth") || CONFIG.Canvas.objectBorderThickness;
         if (game.settings.get("Border-Control", "healthGradient")) {
-            const stepLevel = game.settings.get("Border-Control", "stepLevel")
-            const systemPath = BorderFrame.getActorHpPath()
-            const hpMax = getProperty(this, systemPath.max) + getProperty(this, systemPath.tempMax)
+            const systemPath = BCC.currentSystem
+            const stepLevel = BCC.stepLevel
+            const hpMax = getProperty(this, systemPath.max) + (getProperty(this, systemPath.tempMax) ?? 0)
             const hpValue = getProperty(this, systemPath.value)
-            const tempValue = getProperty(this, systemPath.temp)
-            const hpDecimal = parseInt(BorderFrame.clamp((hpValue / hpMax) * stepLevel, stepLevel, 1))
-            const tempDecimal = parseInt(BorderFrame.clamp(tempValue / (hpMax / 2) * stepLevel, stepLevel, 1))
-            const endColor = hexToRGB(colorStringToHex(game.settings.get("Border-Control", "healthGradientA")))
-            const startColor = hexToRGB(colorStringToHex(game.settings.get("Border-Control", "healthGradientB")))
-            const tempColor = hexToRGB(colorStringToHex(game.settings.get("Border-Control", "healthGradientC")))
-            const colorArray = BorderFrame.interpolateColors(`rgb(${startColor[0] * 255}, ${startColor[1] * 255}, ${startColor[2] * 255})`, `rgb(${endColor[0] * 255}, ${endColor[1] * 255}, ${endColor[2] * 255})`, stepLevel)
-            const tempArray = BorderFrame.interpolateColors(`rgb(${endColor[0] * 255}, ${endColor[1] * 255}, ${endColor[2] * 255})`, `rgb(${tempColor[0] * 255}, ${tempColor[1] * 255}, ${tempColor[2] * 255})`, stepLevel)
-            const tempEx = BorderFrame.rgbToHex(tempArray[tempDecimal - 1])
-            const color = BorderFrame.rgbToHex(colorArray[hpDecimal - 1])
+            const hpDecimal = parseInt(BorderFrame.clamp((hpValue / hpMax) * stepLevel, stepLevel, 1)) || 1
+            const color = BorderFrame.rgbToHex(BCC.colorArray[hpDecimal - 1])
             borderColor.INT = parseInt(color.substr(1), 16)
             if (game.settings.get("Border-Control", "tempHPgradient") && getProperty(this, systemPath.temp) > 0) {
+                const tempValue = getProperty(this, systemPath.temp)
+                const tempDecimal = parseInt(BorderFrame.clamp(tempValue / (hpMax / 2) * stepLevel, stepLevel, 1))
+                const tempEx = BorderFrame.rgbToHex(BCC.tempArray[tempDecimal - 1])
                 borderColor.EX = parseInt(tempEx.substr(1), 16)
             }
 
@@ -593,6 +625,12 @@ class BorderFrame {
 
     static getActorHpPath() {
         switch (game.system.id) {
+            case "symbaroum": return {
+                value: "actor.data.data.health.toughness.value",
+                max: "actor.data.data.health.toughness.max",
+                tempMax: undefined,
+                temp: undefined
+            }
             case "dnd5e": return {
                 value: "actor.data.data.attributes.hp.value",
                 max: "actor.data.data.attributes.hp.max",
