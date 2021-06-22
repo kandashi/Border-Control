@@ -310,6 +310,12 @@ class BCconfig {
             tempMax: "actor.data.data.attributes.hp.tempmax",
             temp: "actor.data.data.attributes.hp.temp"
         }
+        this.pf1 = {
+            value: "actor.data.data.attributes.hp.value",
+            max: "actor.data.data.attributes.hp.max",
+            tempMax: undefined,
+            temp: "actor.data.data.attributes.hp.temp"
+        }
         this.swade = {
             value: "actor.data.data.wounds.value",
             max: "actor.data.data.wounds.max",
