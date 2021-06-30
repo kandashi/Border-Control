@@ -369,11 +369,9 @@ Hooks.on('renderSettingsConfig', (app, el, data) => {
 });
 
 
-Hooks.on("createToken", (_scene, data) => {
-    setTimeout(function () {
-        let token = canvas.tokens.get(data._id)
-        if (!token.owner) token.cursor = "default"
-    }, 500)
+Hooks.on("createToken", (data) => {
+    let token = canvas.tokens.get(data._id)
+    if (!token.owner) token.cursor = "default"
 })
 
 Hooks.once("ready", () => {
@@ -402,6 +400,7 @@ class BorderFrame {
 
     }
     static newBorder() {
+        if(!BCC) BCC = new BCconfig()
         this.border.clear();
         let borderColor = this._getBorderColor();
         if (!borderColor) return;
