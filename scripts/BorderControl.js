@@ -3,8 +3,8 @@ import { libWrapper } from './shim.js';
 let BCC;
 Hooks.once('init', async function () {
     game.settings.register("Border-Control", "removeBorders", {
-        name: 'Remove Borders',
-        hint: 'Remove the border from specific tokens',
+        name: game.i18n.localize('Border-Control.setting.removeBorders.name'),
+        hint: game.i18n.localize('Border-Control.setting.removeBorders.hint'),
         scope: 'world',
         type: String,
         choices: {
@@ -17,28 +17,32 @@ Hooks.once('init', async function () {
     });
 
     game.settings.register("Border-Control", "healthGradient", {
-        name: 'HP Gradient',
+        name: game.i18n.localize('Border-Control.setting.healthGradient.name'),
+        hint: game.i18n.localize('Border-Control.setting.healthGradient.hint'),
         scope: 'world',
         type: Boolean,
         default: false,
         config: true,
     });
     game.settings.register("Border-Control", "tempHPgradient", {
-        name: 'Gradient TempHP Enable',
+        name: game.i18n.localize('Border-Control.setting.tempHPgradient.name'),
+        hint: game.i18n.localize('Border-Control.setting.tempHPgradient.hint'),
         scope: 'world',
         type: Boolean,
         default: false,
         config: true,
     });
     game.settings.register("Border-Control", "healthGradientA", {
-        name: 'HP Gradient Start',
+        name: game.i18n.localize('Border-Control.setting.healthGradientA.name'),
+        hint: game.i18n.localize('Border-Control.setting.healthGradientA.hint'),
         scope: 'world',
         type: String,
         default: "#1b9421",
         config: true,
     });
     game.settings.register("Border-Control", "healthGradientB", {
-        name: 'HP Gradient End',
+        name: game.i18n.localize('Border-Control.setting.healthGradientB.name'),
+        hint: game.i18n.localize('Border-Control.setting.healthGradientB.hint'),
         scope: 'world',
         type: String,
         default: "#c9240a",
@@ -46,7 +50,8 @@ Hooks.once('init', async function () {
     });
 
     game.settings.register("Border-Control", "healthGradientC", {
-        name: 'HP Gradient TempHP',
+        name: game.i18n.localize('Border-Control.setting.healthGradientC.name'),
+        hint: game.i18n.localize('Border-Control.setting.healthGradientC.hint'),
         scope: 'world',
         type: String,
         default: "#22e3dd",
@@ -54,8 +59,8 @@ Hooks.once('init', async function () {
     });
 
     game.settings.register("Border-Control", "stepLevel", {
-        name: 'Gradient Step Level',
-        hint: 'How many individual colors are part of the gradient',
+        name: game.i18n.localize('Border-Control.setting.stepLevel.name'),
+        hint: game.i18n.localize('Border-Control.setting..stepLevel.hint'),
         scope: 'world',
         type: Number,
         default: 10,
@@ -63,53 +68,56 @@ Hooks.once('init', async function () {
     });
 
     game.settings.register("Border-Control", "borderWidth", {
-        name: 'Border Width',
-        hint: 'Override border width',
+        name: game.i18n.localize('Border-Control.setting.borderWidth.name'),
+        hint: game.i18n.localize('Border-Control.setting.borderWidth.hint'),
         scope: 'client',
         type: Number,
         default: 4,
         config: true,
     });
     game.settings.register("Border-Control", "borderOffset", {
-        name: 'Border Offset',
-        hint: 'Customize border offset',
+        name: game.i18n.localize('Border-Control.setting.borderOffset.name'),
+        hint: game.i18n.localize('Border-Control.setting.borderOffset.hint'),
         scope: 'client',
         type: Number,
         default: 0,
         config: true,
     });
     game.settings.register("Border-Control", "targetSize", {
-        name: 'Target Size Multiplier',
+        name: game.i18n.localize('Border-Control.setting.targetSize.name'),
+        hint: game.i18n.localize('Border-Control.setting.targetSize.hint'),
         scope: 'client',
         type: Number,
         default: 1,
         config: true,
     });
     game.settings.register("Border-Control", "internatTarget", {
-        name: 'Internal Target',
-        hint: "Target reticule inside  token borders",
+        name: game.i18n.localize('Border-Control.setting.internatTarget.name'),
+        hint: game.i18n.localize('Border-Control.setting.internatTarget.hint'),
         scope: 'client',
         type: Boolean,
         default: false,
         config: true,
     });
     game.settings.register("Border-Control", "circleBorders", {
-        name: 'Circular Borders',
+        name: game.i18n.localize('Border-Control.setting.circleBorders.name'),
+        hint: game.i18n.localize('Border-Control.setting.circleBorders.hint'),
         scope: 'client',
         type: Boolean,
         default: false,
         config: true,
     });
     game.settings.register("Border-Control", "enableHud", {
-        name: 'Border HUD element',
-        hint: 'Add Token HUD element to disable/enable borders',
+        name: game.i18n.localize('Border-Control.setting.enableHud.name'),
+        hint: game.i18n.localize('Border-Control.setting.enableHud.hint'),
         scope: 'world',
         type: Boolean,
         default: true,
         config: true,
     });
     game.settings.register("Border-Control", "hudPos", {
-        name: 'Border Control HUD Position',
+        name: game.i18n.localize('Border-Control.setting.hudPos.name'),
+        hint: game.i18n.localize('Border-Control.setting.hudPos.hint'),
         scope: 'world',
         type: String,
         default: ".right",
@@ -121,24 +129,24 @@ Hooks.once('init', async function () {
     });
 
     game.settings.register("Border-Control", "circularNameplate", {
-        name: 'Circular Nameplates',
-        hint: "Requires a refresh",
+        name: game.i18n.localize('Border-Control.setting.circularNameplate.name'),
+        hint: game.i18n.localize('Border-Control.setting.circularNameplate.hint'),
         scope: 'world',
         type: Boolean,
         default: false,
         config: true,
     });
     game.settings.register("Border-Control", "circularNameplateRadius", {
-        name: 'Circular Nameplates Radius',
-        hint: "Requires a refresh",
+        name: game.i18n.localize('Border-Control.setting.circularNameplateRadius.name'),
+        hint: game.i18n.localize('Border-Control.setting.circularNameplateRadius.hint'),
         scope: 'world',
         type: Number,
         default: 0,
         config: true,
     });
     game.settings.register("Border-Control", "nameplateOffset", {
-        name: 'Nameplate Y Offset',
-        hint: "Requires a refresh",
+        name: game.i18n.localize('Border-Control.setting.nameplateOffset.name'),
+        hint: game.i18n.localize('Border-Control.setting.nameplateOffset.hint'),
         scope: 'world',
         type: Number,
         default: 0,
@@ -146,14 +154,13 @@ Hooks.once('init', async function () {
     });
 
     game.settings.register("Border-Control", "plateFont", {
-        name: 'Nameplate Font',
-        hint: "Requires a refresh",
+        name: game.i18n.localize('Border-Control.setting.plateFont.name'),
+        hint: game.i18n.localize('Border-Control.setting.plateFont.hint'),
         scope: 'world',
         type: String,
         choices: {
             "arial": "Arial",
             "arial black": "Arial Black",
-            "signika": "Signika",
             "comic sans ms": "Comic Sans MS",
             "courier new": "Courier New",
             "georgia": "Georgia",
@@ -168,109 +175,157 @@ Hooks.once('init', async function () {
         config: true,
     });
     game.settings.register("Border-Control", "sizeMultiplier", {
-        name: 'Nameplate Font Size',
-        hint: "Requires a refresh",
+        name: game.i18n.localize('Border-Control.setting.sizeMultiplier.name'),
+        hint: game.i18n.localize('Border-Control.setting.sizeMultiplier.hint'),
         scope: 'world',
         type: Number,
         default: 1,
         config: true,
     });
     game.settings.register("Border-Control", "plateConsistency", {
-        name: 'Nameplate Consistency',
-        hint: "Attempts to keep nameplates the same size across different grid sizes",
+        name: game.i18n.localize('Border-Control.setting.plateConsistency.name'),
+        hint: game.i18n.localize('Border-Control.setting.plateConsistency.hint'),
         scope: 'world',
         type: Boolean,
         default: false,
         config: true,
     });
 
-    game.settings.register("Border-Control", "controlledColor", {
-        name: 'Color: Controlled',
-        scope: 'client',
-        type: String,
-        default: "#FF9829",
-        config: true,
+    new window.Ardittristan.ColorSetting("Border-Control", "controlledColor", {
+        name: game.i18n.localize('Border-Control.setting.controlledColor.name'),
+        hint: game.i18n.localize('Border-Control.setting.controlledColor.hint'),
+        label: game.i18n.localize('Border-Control.setting.controlledColor.name'),
+        restricted: false,
+        defaultColor: "#FF9829",
+        onChange: function () {
+          // TODO UPDATE COLOR OF THE BORDER ON CANVAS
+        },
+    });   
+
+    new window.Ardittristan.ColorSetting("Border-Control", "controlledColorEx", {
+        name: game.i18n.localize('Border-Control.setting.controlledColorEx.name'),
+        hint: game.i18n.localize('Border-Control.setting.controlledColorEx.hint'),
+        label: game.i18n.localize('Border-Control.setting.controlledColorEx.name'),
+        restricted: false,
+        defaultColor: "#000000",
+        onChange: function () {
+          // TODO UPDATE COLOR OF THE BORDER ON CANVAS
+        },
+    }); 
+
+    new window.Ardittristan.ColorSetting("Border-Control", "hostileColor", {
+        name: game.i18n.localize('Border-Control.setting.hostileColor.name'),
+        hint: game.i18n.localize('Border-Control.setting.hostileColor.hint'),
+        label: game.i18n.localize('Border-Control.setting.hostileColor.name'),
+        restricted: false,
+        defaultColor: "#E72124",
+        onChange: function () {
+          // TODO UPDATE COLOR OF THE BORDER ON CANVAS
+        },
+    }); 
+
+    new window.Ardittristan.ColorSetting("Border-Control", "hostileColorEx", {
+        name: game.i18n.localize('Border-Control.setting.hostileColorEx.name'),
+        hint: game.i18n.localize('Border-Control.setting.hostileColorEx.hint'),
+        label: game.i18n.localize('Border-Control.setting.hostileColorEx.name'),
+        restricted: false,
+        defaultColor: "#000000",
+        onChange: function () {
+          // TODO UPDATE COLOR OF THE BORDER ON CANVAS
+        },
     });
-    game.settings.register("Border-Control", "controlledColorEx", {
-        name: 'Color: Controlled External',
-        scope: 'client',
-        type: String,
-        default: "#000000",
-        config: true,
+
+    new window.Ardittristan.ColorSetting("Border-Control", "friendlyColor", {
+        name: game.i18n.localize('Border-Control.setting.friendlyColor.name'),
+        hint: game.i18n.localize('Border-Control.setting.friendlyColor.hint'),
+        label: game.i18n.localize('Border-Control.setting.friendlyColor.name'),
+        restricted: false,
+        defaultColor: "#43DFDF",
+        onChange: function () {
+          // TODO UPDATE COLOR OF THE BORDER ON CANVAS
+        },
     });
-    game.settings.register("Border-Control", "hostileColor", {
-        name: 'Color: Hostile',
-        scope: 'client',
-        type: String,
-        default: "#E72124",
-        config: true,
+
+    new window.Ardittristan.ColorSetting("Border-Control", "friendlyColorEx", {
+        name: game.i18n.localize('Border-Control.setting.friendlyColorEx.name'),
+        hint: game.i18n.localize('Border-Control.setting.friendlyColorEx.hint'),
+        label: game.i18n.localize('Border-Control.setting.friendlyColorEx.name'),
+        restricted: false,
+        defaultColor: "#000000",
+        onChange: function () {
+          // TODO UPDATE COLOR OF THE BORDER ON CANVAS
+        },
     });
-    game.settings.register("Border-Control", "hostileColorEx", {
-        name: 'Color: Hostile External',
-        scope: 'client',
-        type: String,
-        default: "#000000",
-        config: true,
+
+    new window.Ardittristan.ColorSetting("Border-Control", "neutralColor", {
+        name: game.i18n.localize('Border-Control.setting.neutralColor.name'),
+        hint: game.i18n.localize('Border-Control.setting.neutralColor.hint'),
+        label: game.i18n.localize('Border-Control.setting.neutralColor.name'),
+        restricted: false,
+        defaultColor: "#F1D836",
+        onChange: function () {
+          // TODO UPDATE COLOR OF THE BORDER ON CANVAS
+        },
     });
-    game.settings.register("Border-Control", "friendlyColor", {
-        name: 'Color: Friendly',
-        scope: 'client',
-        type: String,
-        default: "#43DFDF",
-        config: true,
+
+    new window.Ardittristan.ColorSetting("Border-Control", "neutralColorEx", {
+        name: game.i18n.localize('Border-Control.setting.neutralColorEx.name'),
+        hint: game.i18n.localize('Border-Control.setting.neutralColorEx.hint'),
+        label: game.i18n.localize('Border-Control.setting.neutralColorEx.name'),
+        restricted: false,
+        defaultColor: "#000000",
+        onChange: function () {
+          // TODO UPDATE COLOR OF THE BORDER ON CANVAS
+        },
     });
-    game.settings.register("Border-Control", "friendlyColorEx", {
-        name: 'Color: Friendly External',
-        scope: 'client',
-        type: String,
-        default: "#000000",
-        config: true,
+
+    new window.Ardittristan.ColorSetting("Border-Control", "partyColor", {
+        name: game.i18n.localize('Border-Control.setting.partyColor.name'),
+        hint: game.i18n.localize('Border-Control.setting.partyColor.hint'),
+        label: game.i18n.localize('Border-Control.setting.partyColor.name'),
+        restricted: false,
+        defaultColor: "#33BC4E",
+        onChange: function () {
+          // TODO UPDATE COLOR OF THE BORDER ON CANVAS
+        },
     });
-    game.settings.register("Border-Control", "neutralColor", {
-        name: 'Color: Neutral',
-        scope: 'client',
-        type: String,
-        default: "#F1D836",
-        config: true,
+
+    new window.Ardittristan.ColorSetting("Border-Control", "partyColorEx", {
+        name: game.i18n.localize('Border-Control.setting.partyColorEx.name'),
+        hint: game.i18n.localize('Border-Control.setting.partyColorEx.hint'),
+        label: game.i18n.localize('Border-Control.setting.partyColorEx.name'),
+        restricted: false,
+        defaultColor: "#000000",
+        onChange: function () {
+          // TODO UPDATE COLOR OF THE BORDER ON CANVAS
+        },
     });
-    game.settings.register("Border-Control", "neutralColorEx", {
-        name: 'Color: Neutral External',
-        scope: 'client',
-        type: String,
-        default: "#000000",
-        config: true,
+
+    new window.Ardittristan.ColorSetting("Border-Control", "targetColor", {
+        name: game.i18n.localize('Border-Control.setting.targetColor.name'),
+        hint: game.i18n.localize('Border-Control.setting.targetColor.hint'),
+        label: game.i18n.localize('Border-Control.setting.targetColor.name'),
+        restricted: false,
+        defaultColor: "#FF9829",
+        onChange: function () {
+          // TODO UPDATE COLOR OF THE BORDER ON CANVAS
+        },
     });
-    game.settings.register("Border-Control", "partyColor", {
-        name: 'Color: Party',
-        scope: 'client',
-        type: String,
-        default: "#33BC4E",
-        config: true,
+
+    new window.Ardittristan.ColorSetting("Border-Control", "targetColorEx", {
+        name: game.i18n.localize('Border-Control.setting.targetColorEx.name'),
+        hint: game.i18n.localize('Border-Control.setting.targetColorEx.hint'),
+        label: game.i18n.localize('Border-Control.setting.targetColorEx.name'),
+        restricted: false,
+        defaultColor: "#000000",
+        onChange: function () {
+          // TODO UPDATE COLOR OF THE BORDER ON CANVAS
+        },
     });
-    game.settings.register("Border-Control", "partyColorEx", {
-        name: 'Color: Party External',
-        scope: 'client',
-        type: String,
-        default: "#000000",
-        config: true,
-    });
-    game.settings.register("Border-Control", "targetColor", {
-        name: 'Color: Target',
-        scope: 'client',
-        type: String,
-        default: "#FF9829",
-        config: true,
-    });
-    game.settings.register("Border-Control", "targetColorEx", {
-        name: 'Color: Target External',
-        scope: 'client',
-        type: String,
-        default: "#000000",
-        config: true,
-    });
+
     game.settings.register("Border-Control", "disableRefreshTarget", {
-        name: 'Disable the refresh target feature',
-        hint: 'Use other module like Better Target, Smart Target, ecc. for apply design to target',
+        name: game.i18n.localize('Border-Control.setting.disableRefreshTarget.name'),
+        hint: game.i18n.localize('Border-Control.setting.disableRefreshTarget.hint'),
         scope: 'world',
         type: Boolean,
         default: false,
