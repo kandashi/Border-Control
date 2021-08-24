@@ -6,7 +6,7 @@
   "library": "false",
   "manifestPlusVersion": "1.0.0",
   "minimumCoreVersion": "0.8.3",
-  "compatibleCoreVersion": "0.8.6",
+  "compatibleCoreVersion": "0.8.9",
   "authors": [
     {
       "name": "Kandashi",
@@ -16,6 +16,13 @@
   ],
   "esmodules": [
     "/scripts/BorderControl.js"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
   ],
   "url": "This is auto replaced",
   "manifest": "This is auto replaced",
@@ -28,6 +35,16 @@
     {
       "type": "cover",
       "url": "https://raw.githubusercontent.com/kandashi/Border-Control/master/Border%20Control.png"
+    }
+  ],
+  "bugs": "https://github.com/kandashi/Border-Control/issues",
+  "allowBugReporter": true,
+  "dependencies": [
+    {
+      "name": "lib-wrapper"
+    },
+    {
+      "name": "colorsettings"
     }
   ]
 }
