@@ -25,6 +25,6 @@ A border may be toggled off by using the Token HUD element here
 
 ![BorderHUD](./images/Border_Control_HUD.PNG?raw=true)
 
-You can customize your target border icon (note make sure to disable this feature if you use Smart target or Easy Target).
+You can customize your target border icon, note make sure to disable this feature if you use Smart target for avoid collision on the libwrapper library.
 
 ![BorderTarget](./images/Border%20Control.png?raw=true)

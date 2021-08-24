@@ -1,6 +1,6 @@
 import { libWrapper } from './shim.js';
 let BCC;
-Hooks.once('ready', async function () {
+Hooks.once('ready', async function() {
   game.settings.register('Border-Control', 'removeBorders', {
     name: game.i18n.localize('Border-Control.setting.removeBorders.name'),
     hint: game.i18n.localize('Border-Control.setting.removeBorders.hint'),
@@ -127,6 +127,15 @@ Hooks.once('ready', async function () {
     config: true,
   });
 
+  game.settings.register('Border-Control', 'enableCustomNameplate', {
+    name: game.i18n.localize('Border-Control.setting.customNameplate.name'),
+    hint: game.i18n.localize('Border-Control.setting.customNameplate.hint'),
+    scope: 'world',
+    type: Boolean,
+    default: true,
+    config: true,
+  });
+
   game.settings.register('Border-Control', 'circularNameplate', {
     name: game.i18n.localize('Border-Control.setting.circularNameplate.name'),
     hint: game.i18n.localize('Border-Control.setting.circularNameplate.hint'),
@@ -196,7 +205,7 @@ Hooks.once('ready', async function () {
     label: game.i18n.localize('Border-Control.setting.controlledColor.name'),
     restricted: false,
     defaultColor: '#FF9829',
-    onChange: function () {
+    onChange: function() {
       // TODO UPDATE COLOR OF THE BORDER ON CANVAS
     },
   });
@@ -207,7 +216,7 @@ Hooks.once('ready', async function () {
     label: game.i18n.localize('Border-Control.setting.controlledColorEx.name'),
     restricted: false,
     defaultColor: '#000000',
-    onChange: function () {
+    onChange: function() {
       // TODO UPDATE COLOR OF THE BORDER ON CANVAS
     },
   });
@@ -218,7 +227,7 @@ Hooks.once('ready', async function () {
     label: game.i18n.localize('Border-Control.setting.hostileColor.name'),
     restricted: false,
     defaultColor: '#E72124',
-    onChange: function () {
+    onChange: function() {
       // TODO UPDATE COLOR OF THE BORDER ON CANVAS
     },
   });
@@ -229,7 +238,7 @@ Hooks.once('ready', async function () {
     label: game.i18n.localize('Border-Control.setting.hostileColorEx.name'),
     restricted: false,
     defaultColor: '#000000',
-    onChange: function () {
+    onChange: function() {
       // TODO UPDATE COLOR OF THE BORDER ON CANVAS
     },
   });
@@ -240,7 +249,7 @@ Hooks.once('ready', async function () {
     label: game.i18n.localize('Border-Control.setting.friendlyColor.name'),
     restricted: false,
     defaultColor: '#43DFDF',
-    onChange: function () {
+    onChange: function() {
       // TODO UPDATE COLOR OF THE BORDER ON CANVAS
     },
   });
@@ -251,7 +260,7 @@ Hooks.once('ready', async function () {
     label: game.i18n.localize('Border-Control.setting.friendlyColorEx.name'),
     restricted: false,
     defaultColor: '#000000',
-    onChange: function () {
+    onChange: function() {
       // TODO UPDATE COLOR OF THE BORDER ON CANVAS
     },
   });
@@ -262,7 +271,7 @@ Hooks.once('ready', async function () {
     label: game.i18n.localize('Border-Control.setting.neutralColor.name'),
     restricted: false,
     defaultColor: '#F1D836',
-    onChange: function () {
+    onChange: function() {
       // TODO UPDATE COLOR OF THE BORDER ON CANVAS
     },
   });
@@ -273,7 +282,7 @@ Hooks.once('ready', async function () {
     label: game.i18n.localize('Border-Control.setting.neutralColorEx.name'),
     restricted: false,
     defaultColor: '#000000',
-    onChange: function () {
+    onChange: function() {
       // TODO UPDATE COLOR OF THE BORDER ON CANVAS
     },
   });
@@ -284,7 +293,7 @@ Hooks.once('ready', async function () {
     label: game.i18n.localize('Border-Control.setting.partyColor.name'),
     restricted: false,
     defaultColor: '#33BC4E',
-    onChange: function () {
+    onChange: function() {
       // TODO UPDATE COLOR OF THE BORDER ON CANVAS
     },
   });
@@ -295,7 +304,7 @@ Hooks.once('ready', async function () {
     label: game.i18n.localize('Border-Control.setting.partyColorEx.name'),
     restricted: false,
     defaultColor: '#000000',
-    onChange: function () {
+    onChange: function() {
       // TODO UPDATE COLOR OF THE BORDER ON CANVAS
     },
   });
@@ -306,7 +315,7 @@ Hooks.once('ready', async function () {
     label: game.i18n.localize('Border-Control.setting.targetColor.name'),
     restricted: false,
     defaultColor: '#FF9829',
-    onChange: function () {
+    onChange: function() {
       // TODO UPDATE COLOR OF THE BORDER ON CANVAS
     },
   });
@@ -317,7 +326,7 @@ Hooks.once('ready', async function () {
     label: game.i18n.localize('Border-Control.setting.targetColorEx.name'),
     restricted: false,
     defaultColor: '#000000',
-    onChange: function () {
+    onChange: function() {
       // TODO UPDATE COLOR OF THE BORDER ON CANVAS
     },
   });
@@ -336,7 +345,9 @@ Hooks.once('ready', async function () {
   if (!game.settings.get('Border-Control', 'disableRefreshTarget')) {
     libWrapper.register('Border-Control', 'Token.prototype._refreshTarget', BorderFrame.newTarget, 'OVERRIDE');
   }
-  libWrapper.register('Border-Control', 'Token.prototype._drawNameplate', BorderFrame.drawNameplate, 'OVERRIDE');
+  if (game.settings.get('Border-Control', 'enableCustomNameplate')) {
+    libWrapper.register('Border-Control', 'Token.prototype._drawNameplate', BorderFrame.drawNameplate, 'OVERRIDE');
+  }
 });
 
 Hooks.on('ready', () => (BCC = new BCconfig()));
@@ -459,13 +470,13 @@ Hooks.on('renderSettingsConfig', (app, el, data) => {
     .append(`<input type="color"value="${gT}" data-edit="Border-Control.healthGradientC">`);
 });
 
-Hooks.on('createToken', (data) => {
+Hooks.on('createToken', data => {
   let token = canvas.tokens.get(data._id);
   if (!token.owner) token.cursor = 'default';
 });
 
 Hooks.once('ready', () => {
-  canvas.tokens.placeables.forEach((t) => {
+  canvas.tokens.placeables.forEach(t => {
     if (!t.owner) t.cursor = 'default';
   });
 });
@@ -595,7 +606,7 @@ class BorderFrame {
     if (!this.targeted.size) return;
 
     // Determine whether the current user has target and any other users
-    const [others, user] = Array.from(this.targeted).partition((u) => u === game.user);
+    const [others, user] = Array.from(this.targeted).partition(u => u === game.user);
     const userTarget = user.length;
 
     // For the current user, draw the target arrows
@@ -759,6 +770,6 @@ class BorderFrame {
   }
 
   static refreshAll() {
-    canvas.tokens.placeables.forEach((t) => t.draw());
+    canvas.tokens.placeables.forEach(t => t.draw());
   }
 }

@@ -42,6 +42,9 @@
   "Border-Control.setting.hudPos.name": "Border Control HUD Position",
   "Border-Control.setting.hudPos.hint": " ",
 
+  "Border-Control.setting.customNameplate.name": "Custom nameplates",
+  "Border-Control.setting.customNameplate.hint": "This feature if enable let you customize the nameplates on the tokens",
+
   "Border-Control.setting.circularNameplate.name": "Circular Nameplates",
   "Border-Control.setting.circularNameplate.hint": "Requires a refresh",
 
