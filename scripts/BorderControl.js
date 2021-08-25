@@ -292,9 +292,10 @@ Hooks.once('ready', async function() {
   game.settings.register('Border-Control', 'targetColor', {
     name: game.i18n.localize('Border-Control.setting.targetColor.name'),
     hint: game.i18n.localize('Border-Control.setting.targetColor.hint'),
-    label: game.i18n.localize('Border-Control.setting.targetColor.name'),
-    config: true,
+    scope: 'client',
+    type: String,
     default: '#FF9829',
+    config: true,
   });
 
   game.settings.register('Border-Control', 'targetColorEx', {
