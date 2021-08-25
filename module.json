@@ -42,9 +42,6 @@
   "dependencies": [
     {
       "name": "lib-wrapper"
-    },
-    {
-      "name": "colorsettings"
     }
   ]
 }
