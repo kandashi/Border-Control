@@ -21,7 +21,7 @@
   "Border-Control.setting.stepLevel.name": "Gradient Step Level",
   "Border-Control.setting.stepLevel.hint": "How many individual colors are part of the gradient",
 
-  "Border-Control.setting.borderWidthname": "Border Width",
+  "Border-Control.setting.borderWidth.name": "Border Width",
   "Border-Control.setting.borderWidth.hint": "Override border width",
 
   "Border-Control.setting.borderOffset.name": "Border Offset",
