@@ -1,295 +1,8 @@
-
-import { libWrapper } from './shim.js';
 let BCC;
-Hooks.once('init', async function () {
-    game.settings.register("Border-Control", "removeBorders", {
-        name: 'Remove Borders',
-        hint: 'Remove the border from specific tokens',
-        scope: 'world',
-        type: String,
-        choices: {
-            "0": "None",
-            "1": "Non Owned",
-            "2": "All",
-        },
-        default: "0",
-        config: true,
-    });
-
-    game.settings.register("Border-Control", "healthGradient", {
-        name: 'HP Gradient',
-        scope: 'world',
-        type: Boolean,
-        default: false,
-        config: true,
-    });
-    game.settings.register("Border-Control", "tempHPgradient", {
-        name: 'Gradient TempHP Enable',
-        scope: 'world',
-        type: Boolean,
-        default: false,
-        config: true,
-    });
-    game.settings.register("Border-Control", "healthGradientA", {
-        name: 'HP Gradient Start',
-        scope: 'world',
-        type: String,
-        default: "#1b9421",
-        config: true,
-    });
-    game.settings.register("Border-Control", "healthGradientB", {
-        name: 'HP Gradient End',
-        scope: 'world',
-        type: String,
-        default: "#c9240a",
-        config: true,
-    });
-
-    game.settings.register("Border-Control", "healthGradientC", {
-        name: 'HP Gradient TempHP',
-        scope: 'world',
-        type: String,
-        default: "#22e3dd",
-        config: true,
-    });
-
-    game.settings.register("Border-Control", "stepLevel", {
-        name: 'Gradient Step Level',
-        hint: 'How many individual colors are part of the gradient',
-        scope: 'world',
-        type: Number,
-        default: 10,
-        config: true,
-    });
-
-    game.settings.register("Border-Control", "borderWidth", {
-        name: 'Border Width',
-        hint: 'Override border width',
-        scope: 'client',
-        type: Number,
-        default: 4,
-        config: true,
-    });
-    game.settings.register("Border-Control", "borderOffset", {
-        name: 'Border Offset',
-        hint: 'Customize border offset',
-        scope: 'client',
-        type: Number,
-        default: 0,
-        config: true,
-    });
-    game.settings.register("Border-Control", "targetSize", {
-        name: 'Target Size Multiplier',
-        scope: 'client',
-        type: Number,
-        default: 1,
-        config: true,
-    });
-    game.settings.register("Border-Control", "internatTarget", {
-        name: 'Internal Target',
-        hint: "Target reticule inside  token borders",
-        scope: 'client',
-        type: Boolean,
-        default: false,
-        config: true,
-    });
-    game.settings.register("Border-Control", "circleBorders", {
-        name: 'Circular Borders',
-        scope: 'client',
-        type: Boolean,
-        default: false,
-        config: true,
-    });
-    game.settings.register("Border-Control", "enableHud", {
-        name: 'Border HUD element',
-        hint: 'Add Token HUD element to disable/enable borders',
-        scope: 'world',
-        type: Boolean,
-        default: true,
-        config: true,
-    });
-    game.settings.register("Border-Control", "hudPos", {
-        name: 'Border Control HUD Position',
-        scope: 'world',
-        type: String,
-        default: ".right",
-        choices: {
-            ".right": "Right",
-            ".left": "Left",
-        },
-        config: true,
-    });
-
-    game.settings.register("Border-Control", "circularNameplate", {
-        name: 'Circular Nameplates',
-        hint: "Requires a refresh",
-        scope: 'world',
-        type: Boolean,
-        default: false,
-        config: true,
-    });
-    game.settings.register("Border-Control", "circularNameplateRadius", {
-        name: 'Circular Nameplates Radius',
-        hint: "Requires a refresh",
-        scope: 'world',
-        type: Number,
-        default: 0,
-        config: true,
-    });
-    game.settings.register("Border-Control", "nameplateOffset", {
-        name: 'Nameplate Y Offset',
-        hint: "Requires a refresh",
-        scope: 'world',
-        type: Number,
-        default: 0,
-        config: true,
-    });
-
-    game.settings.register("Border-Control", "plateFont", {
-        name: 'Nameplate Font',
-        hint: "Requires a refresh",
-        scope: 'world',
-        type: String,
-        choices: {
-            "arial": "Arial",
-            "arial black": "Arial Black",
-            "signika": "Signika",
-            "comic sans ms": "Comic Sans MS",
-            "courier new": "Courier New",
-            "georgia": "Georgia",
-            "helvetica": "Helvetica",
-            "impact": "Impact",
-            "signika": "Signika",
-            "tahoma": "Tahoma",
-            "times new roman": "Times New Roman",
-            "verdana": "Verdana"
-        },
-        default: "signika",
-        config: true,
-    });
-    game.settings.register("Border-Control", "sizeMultiplier", {
-        name: 'Nameplate Font Size',
-        hint: "Requires a refresh",
-        scope: 'world',
-        type: Number,
-        default: 1,
-        config: true,
-    });
-    game.settings.register("Border-Control", "plateConsistency", {
-        name: 'Nameplate Consistency',
-        hint: "Attempts to keep nameplates the same size across different grid sizes",
-        scope: 'world',
-        type: Boolean,
-        default: false,
-        config: true,
-    });
-
-    game.settings.register("Border-Control", "controlledColor", {
-        name: 'Color: Controlled',
-        scope: 'client',
-        type: String,
-        default: "#FF9829",
-        config: true,
-    });
-    game.settings.register("Border-Control", "controlledColorEx", {
-        name: 'Color: Controlled External',
-        scope: 'client',
-        type: String,
-        default: "#000000",
-        config: true,
-    });
-    game.settings.register("Border-Control", "hostileColor", {
-        name: 'Color: Hostile',
-        scope: 'client',
-        type: String,
-        default: "#E72124",
-        config: true,
-    });
-    game.settings.register("Border-Control", "hostileColorEx", {
-        name: 'Color: Hostile External',
-        scope: 'client',
-        type: String,
-        default: "#000000",
-        config: true,
-    });
-    game.settings.register("Border-Control", "friendlyColor", {
-        name: 'Color: Friendly',
-        scope: 'client',
-        type: String,
-        default: "#43DFDF",
-        config: true,
-    });
-    game.settings.register("Border-Control", "friendlyColorEx", {
-        name: 'Color: Friendly External',
-        scope: 'client',
-        type: String,
-        default: "#000000",
-        config: true,
-    });
-    game.settings.register("Border-Control", "neutralColor", {
-        name: 'Color: Neutral',
-        scope: 'client',
-        type: String,
-        default: "#F1D836",
-        config: true,
-    });
-    game.settings.register("Border-Control", "neutralColorEx", {
-        name: 'Color: Neutral External',
-        scope: 'client',
-        type: String,
-        default: "#000000",
-        config: true,
-    });
-    game.settings.register("Border-Control", "partyColor", {
-        name: 'Color: Party',
-        scope: 'client',
-        type: String,
-        default: "#33BC4E",
-        config: true,
-    });
-    game.settings.register("Border-Control", "partyColorEx", {
-        name: 'Color: Party External',
-        scope: 'client',
-        type: String,
-        default: "#000000",
-        config: true,
-    });
-    game.settings.register("Border-Control", "targetColor", {
-        name: 'Color: Target',
-        scope: 'client',
-        type: String,
-        default: "#FF9829",
-        config: true,
-    });
-    game.settings.register("Border-Control", "targetColorEx", {
-        name: 'Color: Target External',
-        scope: 'client',
-        type: String,
-        default: "#000000",
-        config: true,
-    });
-    game.settings.register("Border-Control", "disableRefreshTarget", {
-        name: 'Disable the refresh target feature',
-        hint: 'Use other module like Better Target, Smart Target, ecc. for apply design to target',
-        scope: 'world',
-        type: Boolean,
-        default: false,
-        config: true,
-    });
-
-    libWrapper.register('Border-Control', 'Token.prototype._refreshBorder', BorderFrame.newBorder, 'OVERRIDE')
-    libWrapper.register('Border-Control', 'Token.prototype._getBorderColor', BorderFrame.newBorderColor, 'OVERRIDE')
-    if (!game.settings.get("Border-Control", "disableRefreshTarget")) {
-        libWrapper.register('Border-Control', 'Token.prototype._refreshTarget', BorderFrame.newTarget, 'OVERRIDE')
-    }
-    libWrapper.register('Border-Control', 'Token.prototype._drawNameplate', BorderFrame.drawNameplate, 'OVERRIDE')
-});
-
 Hooks.on("ready", () => BCC = new BCconfig())
 Hooks.on('renderTokenHUD', (app, html, data) => {
     BorderFrame.AddBorderToggle(app, html, data)
 })
-
 class BCconfig {
     constructor() {
         this.symbaroum = {
@@ -322,6 +35,7 @@ class BCconfig {
             tempMax: undefined,
             temp: undefined
         }
+        
         this.stepLevel = game.settings.get("Border-Control", "stepLevel")
         this.endColor = hexToRGB(colorStringToHex(game.settings.get("Border-Control", "healthGradientA")))
         this.startColor = hexToRGB(colorStringToHex(game.settings.get("Border-Control", "healthGradientB")))
@@ -382,7 +96,7 @@ Hooks.once("ready", () => {
 
 
 
-class BorderFrame {
+export let BorderFrame = class BorderFrame {
     static AddBorderToggle(app, html, data) {
         if (!game.user.isGM) return;
         if (!game.settings.get("Border-Control", "enableHud")) return;
@@ -400,7 +114,7 @@ class BorderFrame {
 
     }
     static newBorder() {
-        if(!BCC) BCC = new BCconfig()
+        if (!BCC) BCC = new BCconfig()
         this.border.clear();
         let borderColor = this._getBorderColor();
         if (!borderColor) return;
@@ -411,7 +125,13 @@ class BorderFrame {
             case "2": return;
         }
         if (this.data.flags["Border-Control"]?.noBorder) return;
-        const t = game.settings.get("Border-Control", "borderWidth") || CONFIG.Canvas.objectBorderThickness;
+        let t = game.settings.get("Border-Control", "borderWidth") || CONFIG.Canvas.objectBorderThickness;
+        if(game.settings.get("Border-Control", "permanentBorder") && this._controlled) t = t*2
+        const sB = game.settings.get("Border-Control", "scaleBorder")
+        const s = sB ? this.data.scale : 1
+        const sW = sB ? (this.w - (this.w * s)) / 2 : 0
+        const sH = sB ? (this.h - (this.h * s)) / 2 : 0
+
         if (game.settings.get("Border-Control", "healthGradient")) {
             const systemPath = BCC.currentSystem
             const stepLevel = BCC.stepLevel
@@ -435,13 +155,13 @@ class BorderFrame {
             const p = game.settings.get("Border-Control", "borderOffset")
             const h = Math.round(t / 2);
             const o = Math.round(h / 2);
-            this.border.lineStyle(t, borderColor.EX, 0.8).drawCircle(this.w / 2, this.h / 2, this.w / 2 + t + p);
-            this.border.lineStyle(h, borderColor.INT, 1.0).drawCircle(this.w / 2, this.h / 2, this.w / 2 + h + t / 2 + p);
+            this.border.lineStyle(t, borderColor.EX, 0.8).drawCircle(this.w / 2, this.h / 2, (this.w / 2) * s + t + p);
+            this.border.lineStyle(h, borderColor.INT, 1.0).drawCircle(this.w / 2, this.h / 2, (this.w / 2) * s + h + t / 2 + p);
         }
         else if (hexTypes.includes(canvas.grid.type) && (this.data.width === 1) && (this.data.height === 1)) {
             const p = game.settings.get("Border-Control", "borderOffset")
             const q = Math.round(p / 2)
-            const polygon = canvas.grid.grid.getPolygon(-1.5 - q, -1.5 - q, this.w + 2 + p, this.h + 2 + p);
+            const polygon = canvas.grid.grid.getPolygon(-1.5 - q + sW, -1.5 - q + sH, (this.w + 2)*s + p, (this.h + 2)*s + p);
             this.border.lineStyle(t, borderColor.EX, 0.8).drawPolygon(polygon);
             this.border.lineStyle(t / 2, borderColor.INT, 1.0).drawPolygon(polygon);
         }
@@ -452,8 +172,9 @@ class BorderFrame {
             const q = Math.round(p / 2)
             const h = Math.round(t / 2);
             const o = Math.round(h / 2);
-            this.border.lineStyle(t, borderColor.EX, 0.8).drawRoundedRect(-o - q, -o - q, this.w + h + p, this.h + h + p, 3);
-            this.border.lineStyle(h, borderColor.INT, 1.0).drawRoundedRect(-o - q, -o - q, this.w + h + p, this.h + h + p, 3);
+
+            this.border.lineStyle(t, borderColor.EX, 0.8).drawRoundedRect(-o - q + sW, -o - q + sH, (this.w + h) * s + p, (this.h + h) * s + p, 3);
+            this.border.lineStyle(h, borderColor.INT, 1.0).drawRoundedRect(-o - q + sW, -o - q + sH, (this.w + h) * s + p, (this.h + h) * s + p, 3);
         }
         return;
     }
@@ -486,7 +207,7 @@ class BorderFrame {
             },
         }
         if (this._controlled) return overrides.CONTROLLED;
-        else if (this._hover) {
+        else if (this._hover || game.settings.get("Border-Control", "permanentBorder")) {
             let disPath = isNewerVersion(game.data.version, "0.8.0") ? CONST.TOKEN_DISPOSITIONS : TOKEN_DISPOSITIONS
             let d = parseInt(this.data.disposition);
             if (!game.user.isGM && this.owner) return overrides.CONTROLLED;
@@ -661,7 +382,7 @@ class BorderFrame {
                 if (game.settings.get("Border-Control", "plateConsistency")) style.fontSize *= canvas.grid.size / 100
             }
             var text = new PreciseText(this.name, style);
-            text.resolution = 2;
+            text.resolution = 4;
             text.style.trim = true;
             text.updateText();
 
