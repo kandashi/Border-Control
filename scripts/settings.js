@@ -80,6 +80,16 @@ Hooks.once('init', async function () {
         default: 4,
         config: true,
     });
+
+    game.settings.register("Border-Control", "borderGridScale", {
+        name: 'Grid Scaling',
+        hint: 'Scale border width to grid size, based on 100px grid',
+        scope: 'client',
+        type: Boolean,
+        default: false,
+        config: true,
+    });
+
     game.settings.register("Border-Control", "borderOffset", {
         name: 'Border Offset',
         hint: 'Customize border offset in pixels',

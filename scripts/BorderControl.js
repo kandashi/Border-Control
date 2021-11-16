@@ -128,6 +128,9 @@ export let BorderFrame = class BorderFrame {
         let t = game.settings.get("Border-Control", "borderWidth") || CONFIG.Canvas.objectBorderThickness;
         if(game.settings.get("Border-Control", "permanentBorder") && this._controlled) t = t*2
         const sB = game.settings.get("Border-Control", "scaleBorder")
+        const bS = game.settings.get("Border-Control", "borderGridScale")
+        const nBS = bS ? canvas.dimensions.size / 100 : 1
+
         const s = sB ? this.data.scale : 1
         const sW = sB ? (this.w - (this.w * s)) / 2 : 0
         const sH = sB ? (this.h - (this.h * s)) / 2 : 0
@@ -155,15 +158,15 @@ export let BorderFrame = class BorderFrame {
             const p = game.settings.get("Border-Control", "borderOffset")
             const h = Math.round(t / 2);
             const o = Math.round(h / 2);
-            this.border.lineStyle(t, borderColor.EX, 0.8).drawCircle(this.w / 2, this.h / 2, (this.w / 2) * s + t + p);
-            this.border.lineStyle(h, borderColor.INT, 1.0).drawCircle(this.w / 2, this.h / 2, (this.w / 2) * s + h + t / 2 + p);
+            this.border.lineStyle(t*nBS, borderColor.EX, 0.8).drawCircle(this.w / 2, this.h / 2, (this.w / 2) * s + t + p);
+            this.border.lineStyle(h*nBS, borderColor.INT, 1.0).drawCircle(this.w / 2, this.h / 2, (this.w / 2) * s + h + t / 2 + p);
         }
         else if (hexTypes.includes(canvas.grid.type) && (this.data.width === 1) && (this.data.height === 1)) {
             const p = game.settings.get("Border-Control", "borderOffset")
             const q = Math.round(p / 2)
             const polygon = canvas.grid.grid.getPolygon(-1.5 - q + sW, -1.5 - q + sH, (this.w + 2)*s + p, (this.h + 2)*s + p);
-            this.border.lineStyle(t, borderColor.EX, 0.8).drawPolygon(polygon);
-            this.border.lineStyle(t / 2, borderColor.INT, 1.0).drawPolygon(polygon);
+            this.border.lineStyle(t*nBS, borderColor.EX, 0.8).drawPolygon(polygon);
+            this.border.lineStyle(t*nBS / 2, borderColor.INT, 1.0).drawPolygon(polygon);
         }
 
         // Otherwise Draw Square border
@@ -173,8 +176,8 @@ export let BorderFrame = class BorderFrame {
             const h = Math.round(t / 2);
             const o = Math.round(h / 2);
 
-            this.border.lineStyle(t, borderColor.EX, 0.8).drawRoundedRect(-o - q + sW, -o - q + sH, (this.w + h) * s + p, (this.h + h) * s + p, 3);
-            this.border.lineStyle(h, borderColor.INT, 1.0).drawRoundedRect(-o - q + sW, -o - q + sH, (this.w + h) * s + p, (this.h + h) * s + p, 3);
+            this.border.lineStyle(t*nBS, borderColor.EX, 0.8).drawRoundedRect(-o - q + sW, -o - q + sH, (this.w + h) * s + p, (this.h + h) * s + p, 3);
+            this.border.lineStyle(h*nBS, borderColor.INT, 1.0).drawRoundedRect(-o - q + sW, -o - q + sH, (this.w + h) * s + p, (this.h + h) * s + p, 3);
         }
         return;
     }
