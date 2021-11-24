@@ -227,7 +227,7 @@ export let BorderFrame = class BorderFrame {
         const INT = parseInt(game.settings.get("Border-Control", "targetColor").substr(1), 16);
         const EX = parseInt(game.settings.get("Border-Control", "targetColorEx").substr(1), 16);
 
-        this.target.clear();
+        this.hud.target.clear();
         if (!this.targeted.size) return;
 
         // Determine whether the current user has target and any other users
@@ -246,7 +246,7 @@ export let BorderFrame = class BorderFrame {
                 let w = this.w; // token width
                 let hw = w / 2; // half width
                 let ah = canvas.dimensions.size / 3 * multiplier;
-                this.target.beginFill(INT, 1.0).lineStyle(1, EX)
+                this.hud.target.beginFill(INT, 1.0).lineStyle(1, EX)
                     .drawPolygon([
                         -p - aw, hh,
                         -p, hh - ah,
@@ -276,7 +276,7 @@ export let BorderFrame = class BorderFrame {
                 let w = this.w; // token width
                 let hw = w / 2; // half width
                 let ah = canvas.dimensions.size / 3 * multiplier;
-                this.target.beginFill(INT, 1.0).lineStyle(1, EX)
+                this.hud.target.beginFill(INT, 1.0).lineStyle(1, EX)
                     .drawPolygon([
                         -p, hh,
                         -p - aw, hh - ah,
@@ -302,7 +302,7 @@ export let BorderFrame = class BorderFrame {
         // For other users, draw offset pips
         for (let [i, u] of others.entries()) {
             let color = colorStringToHex(u.data.color);
-            this.target.beginFill(color, 1.0).lineStyle(2, 0x0000000).drawCircle(2 + (i * 8), 0, 6);
+            this.hud.target.beginFill(color, 1.0).lineStyle(2, 0x0000000).drawCircle(2 + (i * 8), 0, 6);
         }
     }
 
