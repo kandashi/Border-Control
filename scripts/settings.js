@@ -1,6 +1,10 @@
 import { libWrapper } from './shim.js';
 import { BorderFrame } from "./BorderControl.js";
 let possibleSystems = ["dnd5e", "symbaroum", "pf2e", "pf1", "swade"]
+
+let fontFamilies = {}
+CONFIG.fontFamilies.forEach(i => fontFamilies[`${i}`] = i)
+debugger 
 Hooks.once('init', async function () {
     game.settings.register("Border-Control", "removeBorders", {
         name: 'Remove Borders',
@@ -177,20 +181,7 @@ Hooks.once('init', async function () {
         hint: "Requires a refresh",
         scope: 'world',
         type: String,
-        choices: {
-            "arial": "Arial",
-            "arial black": "Arial Black",
-            "signika": "Signika",
-            "comic sans ms": "Comic Sans MS",
-            "courier new": "Courier New",
-            "georgia": "Georgia",
-            "helvetica": "Helvetica",
-            "impact": "Impact",
-            "signika": "Signika",
-            "tahoma": "Tahoma",
-            "times new roman": "Times New Roman",
-            "verdana": "Verdana"
-        },
+        choices: fontFamilies,
         default: "signika",
         config: true,
     });

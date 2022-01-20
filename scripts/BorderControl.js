@@ -84,7 +84,7 @@ Hooks.on('renderSettingsConfig', (app, el, data) => {
 
 
 Hooks.on("createToken", (data) => {
-    let token = canvas.tokens.get(data._id)
+    let token = canvas.tokens.get(data.id)
     if (!token.owner) token.cursor = "default"
 })
 
@@ -211,7 +211,7 @@ export let BorderFrame = class BorderFrame {
         }
         if (this._controlled) return overrides.CONTROLLED;
         else if (this._hover || game.settings.get("Border-Control", "permanentBorder")) {
-            let disPath = isNewerVersion(game.data.version, "0.8.0") ? CONST.TOKEN_DISPOSITIONS : TOKEN_DISPOSITIONS
+            let disPath = CONST.TOKEN_DISPOSITIONS;
             let d = parseInt(this.data.disposition);
             if (!game.user.isGM && this.owner) return overrides.CONTROLLED;
             else if (this.actor?.hasPlayerOwner) return overrides.PARTY;
