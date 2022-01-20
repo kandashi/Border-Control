@@ -4,7 +4,7 @@ let possibleSystems = ["dnd5e", "symbaroum", "pf2e", "pf1", "swade"]
 
 let fontFamilies = {}
 CONFIG.fontFamilies.forEach(i => fontFamilies[`${i}`] = i)
-debugger 
+ 
 Hooks.once('init', async function () {
     game.settings.register("Border-Control", "removeBorders", {
         name: 'Remove Borders',
