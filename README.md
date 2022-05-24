@@ -26,3 +26,5 @@ Available fonts are: Arial, Arial Black, Comic Sans MS, Courier New, Georgia, He
 A border may be toggled off by using the Token HUD element here
 
 ![BorderHUD](https://github.com/kandashi/Border-Control/blob/master/Border_Control_HUD.PNG?raw=true)
+
+HUD Bars can be set to show as semi-transparant when only visible to the 

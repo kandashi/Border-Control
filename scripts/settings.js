@@ -167,6 +167,21 @@ Hooks.once('init', async function () {
         default: 0,
         config: true,
     });
+    game.settings.register("Border-Control", "nameplateColor", {
+        name: 'Nameplate Color',
+        scope: 'client',
+        type: String,
+        default: "#FFFFFF",
+        config: true,
+    });
+    game.settings.register("Border-Control", "nameplateColorGM", {
+        name: 'Nameplate Color for GM only view',
+        hint: "Nameplate color used when only the GM can see the nameplate",
+        scope: 'client',
+        type: String,
+        default: "#FFFFFF",
+        config: true,
+    });
     game.settings.register("Border-Control", "nameplateOffset", {
         name: 'Nameplate Y Offset',
         hint: "Y axis offset in pixels",
@@ -295,6 +310,14 @@ Hooks.once('init', async function () {
         default: false,
         config: true,
     });
+    game.settings.register("Border-Control", "barAlpha", {
+        name: 'Transparent Bars',
+        hint: 'Display transparent HUD bars if these elements are not visible to players',
+        scope: 'world',
+        type: Boolean,
+        default: false,
+        config: true,
+    });
 
     libWrapper.register('Border-Control', 'Token.prototype._refreshBorder', BorderFrame.newBorder, 'OVERRIDE')
     libWrapper.register('Border-Control', 'Token.prototype._getBorderColor', BorderFrame.newBorderColor, 'OVERRIDE')
@@ -302,4 +325,7 @@ Hooks.once('init', async function () {
         libWrapper.register('Border-Control', 'Token.prototype._refreshTarget', BorderFrame.newTarget, 'OVERRIDE')
     }
     libWrapper.register('Border-Control', 'Token.prototype._drawNameplate', BorderFrame.drawNameplate, 'OVERRIDE')
+    libWrapper.register('Border-Control', 'Token.prototype.drawBars', BorderFrame.drawBars, 'MIXED')
+    
+
 });

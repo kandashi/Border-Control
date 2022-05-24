@@ -35,7 +35,7 @@ class BCconfig {
             tempMax: undefined,
             temp: undefined
         }
-        
+
         this.stepLevel = game.settings.get("Border-Control", "stepLevel")
         this.endColor = hexToRGB(colorStringToHex(game.settings.get("Border-Control", "healthGradientA")))
         this.startColor = hexToRGB(colorStringToHex(game.settings.get("Border-Control", "healthGradientB")))
@@ -62,6 +62,8 @@ Hooks.on('renderSettingsConfig', (app, el, data) => {
     let gS = game.settings.get("Border-Control", "healthGradientA");
     let gE = game.settings.get("Border-Control", "healthGradientB");
     let gT = game.settings.get("Border-Control", "healthGradientC");
+    let nPC = game.settings.get("Border-Control", "nameplateColor");
+    let nPCGM = game.settings.get("Border-Control", "nameplateColorGM");
     el.find('[name="Border-Control.neutralColor"]').parent().append(`<input type="color" value="${nC}" data-edit="Border-Control.neutralColor">`)
     el.find('[name="Border-Control.friendlyColor"]').parent().append(`<input type="color" value="${fC}" data-edit="Border-Control.friendlyColor">`)
     el.find('[name="Border-Control.hostileColor"]').parent().append(`<input type="color" value="${hC}" data-edit="Border-Control.hostileColor">`)
@@ -79,7 +81,8 @@ Hooks.on('renderSettingsConfig', (app, el, data) => {
     el.find('[name="Border-Control.healthGradientA"]').parent().append(`<input type="color"value="${gS}" data-edit="Border-Control.healthGradientA">`)
     el.find('[name="Border-Control.healthGradientB"]').parent().append(`<input type="color"value="${gE}" data-edit="Border-Control.healthGradientB">`)
     el.find('[name="Border-Control.healthGradientC"]').parent().append(`<input type="color"value="${gT}" data-edit="Border-Control.healthGradientC">`)
-
+    el.find('[name="Border-Control.nameplateColor"]').parent().append(`<input type="color"value="${nPC}" data-edit="Border-Control.nameplateColor">`)
+    el.find('[name="Border-Control.nameplateColorGM"]').parent().append(`<input type="color"value="${nPCGM}" data-edit="Border-Control.nameplateColorGM">`)
 });
 
 
@@ -126,7 +129,7 @@ export let BorderFrame = class BorderFrame {
         }
         if (this.data.flags["Border-Control"]?.noBorder) return;
         let t = game.settings.get("Border-Control", "borderWidth") || CONFIG.Canvas.objectBorderThickness;
-        if(game.settings.get("Border-Control", "permanentBorder") && this._controlled) t = t*2
+        if (game.settings.get("Border-Control", "permanentBorder") && this._controlled) t = t * 2
         const sB = game.settings.get("Border-Control", "scaleBorder")
         const bS = game.settings.get("Border-Control", "borderGridScale")
         const nBS = bS ? canvas.dimensions.size / 100 : 1
@@ -158,15 +161,15 @@ export let BorderFrame = class BorderFrame {
             const p = game.settings.get("Border-Control", "borderOffset")
             const h = Math.round(t / 2);
             const o = Math.round(h / 2);
-            this.border.lineStyle(t*nBS, borderColor.EX, 0.8).drawCircle(this.w / 2, this.h / 2, (this.w / 2) * s + t + p);
-            this.border.lineStyle(h*nBS, borderColor.INT, 1.0).drawCircle(this.w / 2, this.h / 2, (this.w / 2) * s + h + t / 2 + p);
+            this.border.lineStyle(t * nBS, borderColor.EX, 0.8).drawCircle(this.w / 2, this.h / 2, (this.w / 2) * s + t + p);
+            this.border.lineStyle(h * nBS, borderColor.INT, 1.0).drawCircle(this.w / 2, this.h / 2, (this.w / 2) * s + h + t / 2 + p);
         }
         else if (hexTypes.includes(canvas.grid.type) && (this.data.width === 1) && (this.data.height === 1)) {
             const p = game.settings.get("Border-Control", "borderOffset")
             const q = Math.round(p / 2)
-            const polygon = canvas.grid.grid.getPolygon(-1.5 - q + sW, -1.5 - q + sH, (this.w + 2)*s + p, (this.h + 2)*s + p);
-            this.border.lineStyle(t*nBS, borderColor.EX, 0.8).drawPolygon(polygon);
-            this.border.lineStyle(t*nBS / 2, borderColor.INT, 1.0).drawPolygon(polygon);
+            const polygon = canvas.grid.grid.getPolygon(-1.5 - q + sW, -1.5 - q + sH, (this.w + 2) * s + p, (this.h + 2) * s + p);
+            this.border.lineStyle(t * nBS, borderColor.EX, 0.8).drawPolygon(polygon);
+            this.border.lineStyle(t * nBS / 2, borderColor.INT, 1.0).drawPolygon(polygon);
         }
 
         // Otherwise Draw Square border
@@ -176,8 +179,8 @@ export let BorderFrame = class BorderFrame {
             const h = Math.round(t / 2);
             const o = Math.round(h / 2);
 
-            this.border.lineStyle(t*nBS, borderColor.EX, 0.8).drawRoundedRect(-o - q + sW, -o - q + sH, (this.w + h) * s + p, (this.h + h) * s + p, 3);
-            this.border.lineStyle(h*nBS, borderColor.INT, 1.0).drawRoundedRect(-o - q + sW, -o - q + sH, (this.w + h) * s + p, (this.h + h) * s + p, 3);
+            this.border.lineStyle(t * nBS, borderColor.EX, 0.8).drawRoundedRect(-o - q + sW, -o - q + sH, (this.w + h) * s + p, (this.h + h) * s + p, 3);
+            this.border.lineStyle(h * nBS, borderColor.INT, 1.0).drawRoundedRect(-o - q + sW, -o - q + sH, (this.w + h) * s + p, (this.h + h) * s + p, 3);
         }
         return;
     }
@@ -374,6 +377,7 @@ export let BorderFrame = class BorderFrame {
         const yOff = game.settings.get("Border-Control", "nameplateOffset")
         const bOff = game.settings.get("Border-Control", "borderWidth") / 2
         const replaceFont = game.settings.get("Border-Control", "plateFont")
+        let color = game.user.isGM && [10, 40, 20].includes(this.data.displayName) ? game.settings.get("Border-Control", "nameplateColorGM") : game.settings.get("Border-Control", "nameplateColor")
         const sizeMulti = game.settings.get("Border-Control", "sizeMultiplier")
 
         if (game.settings.get("Border-Control", "circularNameplate")) {
@@ -382,8 +386,9 @@ export let BorderFrame = class BorderFrame {
             if (!game.modules.get("custom-nameplates")?.active) {
                 style.fontFamily = replaceFont
                 style.fontSize *= sizeMulti
-                if (game.settings.get("Border-Control", "plateConsistency")) style.fontSize *= canvas.grid.size / 100
             }
+            if (game.settings.get("Border-Control", "plateConsistency")) style.fontSize *= canvas.grid.size / 100
+            style.fill = color
             var text = new PreciseText(this.name, style);
             text.resolution = 4;
             text.style.trim = true;
@@ -413,6 +418,9 @@ export let BorderFrame = class BorderFrame {
                 style.fontFamily = game.settings.get("Border-Control", "plateFont")
                 style.fontSize *= sizeMulti
             }
+            if (game.settings.get("Border-Control", "plateConsistency")) style.fontSize *= canvas.grid.size / 100
+            style.fill = color
+
             const name = new PreciseText(this.data.name, style);
             name.anchor.set(0.5, 0);
             name.position.set(this.w / 2, this.h + bOff + yOff + offSet);
@@ -423,5 +431,18 @@ export let BorderFrame = class BorderFrame {
 
     static refreshAll() {
         canvas.tokens.placeables.forEach(t => t.draw())
+    }
+
+    static drawBars(wrapped, ...args) {
+        if (!game.settings.get("Border-Control", "barAlpha") || !game.user.isGM) return wrapped(...args);
+        if (!this.actor || ([50, 0, 30].includes(this.data.displayBars))) return wrapped(...args);
+        else return ["bar1", "bar2"].forEach((b, i) => {
+            const bar = this.hud.bars[b];
+            const attr = this.document.getBarAttribute(b);
+            if (!attr || (attr.type !== "bar")) return bar.visible = false;
+            this._drawBar(i, bar, attr);
+            bar.visible = true;
+            bar.alpha = 0.5
+        });
     }
 }
