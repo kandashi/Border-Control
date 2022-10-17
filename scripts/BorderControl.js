@@ -137,9 +137,6 @@ export let BorderFrame = class BorderFrame {
         const bS = game.settings.get("Border-Control", "borderGridScale")
         const nBS = bS ? canvas.dimensions.size / 100 : 1
 
-        console.log(this)
-        console.log(this.scale)
-
         const s = sB ? this.scale : 1
         const sW = sB ? (this.w - (this.w * s)) / 2 : 0
         const sH = sB ? (this.h - (this.h * s)) / 2 : 0
@@ -237,27 +234,27 @@ export let BorderFrame = class BorderFrame {
     }
 
     static newTarget(reticule) {
-        const multiplier = game.settings.get("Border-Control", "targetSize");
-        const INT = parseInt(game.settings.get("Border-Control", "targetColor").substr(1), 16);
-        const EX = parseInt(game.settings.get("Border-Control", "targetColorEx").substr(1), 16);
+
+        // const multiplier = game.settings.get("Border-Control", "targetSize");
+        // const INT = parseInt(game.settings.get("Border-Control", "targetColor").substr(1), 16);
+        // const EX = parseInt(game.settings.get("Border-Control", "targetColorEx").substr(1), 16);
 
         this.target.clear();
-        if (!this.targeted.size) return;
-
+        if ( !this.targeted.size ) return;
+    
         // Determine whether the current user has target and any other users
         const [others, user] = Array.from(this.targeted).partition(u => u === game.user);
-        
+    
         // For the current user, draw the target arrows
         if ( user.length ) this._drawTarget(reticule);
-
-
+    
         // For other users, draw offset pips
         const hw = this.w / 2;
         for ( let [i, u] of others.entries() ) {
-            const offset = Math.floor((i+1) / 2) * 16;
-            const sign = i % 2 === 0 ? 1 : -1;
-            const x = hw + (sign * offset);
-            this.target.beginFill(Color.from(u.color), 1.0).lineStyle(2, 0x0000000).drawCircle(x, 0, 6);
+          const offset = Math.floor((i+1) / 2) * 16;
+          const sign = i % 2 === 0 ? 1 : -1;
+          const x = hw + (sign * offset);
+          this.target.beginFill(Color.from(u.color), 1.0).lineStyle(2, 0x0000000).drawCircle(x, 0, 6);
         }
     }
 
@@ -386,7 +383,7 @@ export let BorderFrame = class BorderFrame {
     }
 
     static drawBars(wrapped, ...args) {
-        if (!game.settings.get("Border-Control", "barAlpha") || !game.user.isGM) {console.log("Enter"); return wrapped(...args);}
+        if (!game.settings.get("Border-Control", "barAlpha") || !game.user.isGM) {return wrapped(...args);}
         if (!this.actor || ([50, 0, 30].includes(this.document.displayBars))) return wrapped(...args);
         else return ["bar1", "bar2"].forEach((b, i) => {
             const bar = this.bars[b];
@@ -398,4 +395,25 @@ export let BorderFrame = class BorderFrame {
             this.bars.visible = this._canViewMode(this.document.displayBars);
         });
     }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Draw the targeting arrows around this token.
+   * @param {ReticuleOptions} [reticule]  Additional parameters to configure how the targeting reticule is drawn.
+   * @protected
+   */
+   static _drawTarget({margin: m=0, alpha=1, size=.15, color, border: {width=2, color: lineColor=0}={}}={}) {
+    const l = canvas.dimensions.size * size; // Side length.
+    const {h, w} = this;
+    const lineStyle = {color: lineColor, alpha, width, cap: PIXI.LINE_CAP.ROUND, join: PIXI.LINE_JOIN.BEVEL};
+    color ??= this._getBorderColor({hover: true});
+        
+    m *= l * -1;
+    this.target.beginFill(color.INT, alpha).lineStyle(lineStyle)
+      .drawPolygon([-m, -m, -m-l, -m, -m, -m-l]) // Top left
+      .drawPolygon([w+m, -m, w+m+l, -m, w+m, -m-l]) // Top right
+      .drawPolygon([-m, h+m, -m-l, h+m, -m, h+m+l]) // Bottom left
+      .drawPolygon([w+m, h+m, w+m+l, h+m, w+m, h+m+l]); // Bottom right
+  }
 }
