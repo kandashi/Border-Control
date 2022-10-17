@@ -321,9 +321,9 @@ Hooks.once('init', async function () {
 
     libWrapper.register('Border-Control', 'Token.prototype._refreshBorder', BorderFrame.newBorder, 'OVERRIDE')
     libWrapper.register('Border-Control', 'Token.prototype._getBorderColor', BorderFrame.newBorderColor, 'OVERRIDE')
-    // if (!game.settings.get("Border-Control", "disableRefreshTarget")) {
-    //     libWrapper.register('Border-Control', 'Token.prototype._refreshTarget', BorderFrame.newTarget, 'OVERRIDE')
-    // }
+    if (!game.settings.get("Border-Control", "disableRefreshTarget")) {
+        libWrapper.register('Border-Control', 'Token.prototype._refreshTarget', BorderFrame.newTarget, 'OVERRIDE')
+    }
     libWrapper.register('Border-Control', 'Token.prototype._drawNameplate', BorderFrame.drawNameplate, 'OVERRIDE')
     libWrapper.register('Border-Control', 'Token.prototype.drawBars', BorderFrame.drawBars, 'MIXED')
 

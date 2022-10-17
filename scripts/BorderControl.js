@@ -235,9 +235,9 @@ export let BorderFrame = class BorderFrame {
 
     static newTarget(reticule) {
 
-        // const multiplier = game.settings.get("Border-Control", "targetSize");
-        // const INT = parseInt(game.settings.get("Border-Control", "targetColor").substr(1), 16);
-        // const EX = parseInt(game.settings.get("Border-Control", "targetColorEx").substr(1), 16);
+        const multiplier = game.settings.get("Border-Control", "targetSize");
+        const INT = parseInt(game.settings.get("Border-Control", "targetColor").substr(1), 16);
+        const EX = parseInt(game.settings.get("Border-Control", "targetColorEx").substr(1), 16);
 
         this.target.clear();
         if ( !this.targeted.size ) return;
