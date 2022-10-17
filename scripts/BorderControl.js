@@ -6,40 +6,40 @@ Hooks.on('renderTokenHUD', (app, html, data) => {
 class BCconfig {
     constructor() {
         this.symbaroum = {
-            value: "actor.data.data.health.toughness.value",
-            max: "actor.data.data.health.toughness.max",
+            value: "actor.system.health.toughness.value",
+            max: "actor.system.health.toughness.max",
             tempMax: undefined,
             temp: undefined
         }
         this.dnd5e = {
-            value: "actor.data.data.attributes.hp.value",
-            max: "actor.data.data.attributes.hp.max",
+            value: "actor.system.attributes.hp.value",
+            max: "actor.system.attributes.hp.max",
             tempMax: undefined,
-            temp: "actor.data.data.attributes.hp.temp"
+            temp: "actor.system.attributes.hp.temp"
         }
         this.pf2e = {
-            value: "actor.data.data.attributes.hp.value",
-            max: "actor.data.data.attributes.hp.max",
-            tempMax: "actor.data.data.attributes.hp.tempmax",
-            temp: "actor.data.data.attributes.hp.temp"
+            value: "actor.system.attributes.hp.value",
+            max: "actor.system.attributes.hp.max",
+            tempMax: "actor.system.attributes.hp.tempmax",
+            temp: "actor.system.attributes.hp.temp"
         }
         this.pf1 = {
-            value: "actor.data.data.attributes.hp.value",
-            max: "actor.data.data.attributes.hp.max",
+            value: "actor.system.attributes.hp.value",
+            max: "actor.system.attributes.hp.max",
             tempMax: undefined,
-            temp: "actor.data.data.attributes.hp.temp"
+            temp: "actor.system.attributes.hp.temp"
         }
         this.swade = {
-            value: "actor.data.data.wounds.value",
-            max: "actor.data.data.wounds.max",
+            value: "actor.system.wounds.value",
+            max: "actor.system.wounds.max",
             tempMax: undefined,
             temp: undefined
         }
 
         this.stepLevel = game.settings.get("Border-Control", "stepLevel")
-        this.endColor = hexToRGB(colorStringToHex(game.settings.get("Border-Control", "healthGradientA")))
-        this.startColor = hexToRGB(colorStringToHex(game.settings.get("Border-Control", "healthGradientB")))
-        this.tempColor = hexToRGB(colorStringToHex(game.settings.get("Border-Control", "healthGradientC")))
+        this.endColor = Color.from(game.settings.get("Border-Control", "healthGradientA")).rgb
+        this.startColor = Color.from(game.settings.get("Border-Control", "healthGradientB")).rgb
+        this.tempColor = Color.from(game.settings.get("Border-Control", "healthGradientC")).rgb
         this.colorArray = BorderFrame.interpolateColors(`rgb(${this.startColor[0] * 255}, ${this.startColor[1] * 255}, ${this.startColor[2] * 255})`, `rgb(${this.endColor[0] * 255}, ${this.endColor[1] * 255}, ${this.endColor[2] * 255})`, this.stepLevel)
         this.tempArray = BorderFrame.interpolateColors(`rgb(${this.endColor[0] * 255}, ${this.endColor[1] * 255}, ${this.endColor[2] * 255})`, `rgb(${this.tempColor[0] * 255}, ${this.tempColor[1] * 255}, ${this.tempColor[2] * 255})`, this.stepLevel)
 
@@ -104,7 +104,7 @@ export let BorderFrame = class BorderFrame {
         if (!game.user.isGM) return;
         if (!game.settings.get("Border-Control", "enableHud")) return;
         const buttonPos = game.settings.get("Border-Control", "hudPos")
-        const borderButton = `<div class="control-icon border ${app.object.data.flags["Border-Control"]?.noBorder ? "active" : ""}" title="Toggle Border"> <i class="fas fa-border-style"></i></div>`
+        const borderButton = `<div class="control-icon border ${app.object.document.flags["Border-Control"]?.noBorder ? "active" : ""}" title="Toggle Border"> <i class="fas fa-border-style"></i></div>`
         let Pos = html.find(buttonPos)
         Pos.append(borderButton)
         html.find('.border').click(this.ToggleBorder.bind(app))
@@ -118,6 +118,7 @@ export let BorderFrame = class BorderFrame {
     }
     static newBorder() {
         if (!BCC) BCC = new BCconfig()
+        
         this.border.clear();
         let borderColor = this._getBorderColor();
         if (!borderColor) return;
@@ -127,14 +128,16 @@ export let BorderFrame = class BorderFrame {
                 break;
             case "2": return;
         }
-        if (this.data.flags["Border-Control"]?.noBorder) return;
+        if (this.document.flags["Border-Control"]?.noBorder) return;
         let t = game.settings.get("Border-Control", "borderWidth") || CONFIG.Canvas.objectBorderThickness;
-        if (game.settings.get("Border-Control", "permanentBorder") && this._controlled) t = t * 2
+        this.border.position.set(this.document.x, this.document.y);
+
+        if (game.settings.get("Border-Control", "permanentBorder") && this.controlled) t = t * 2
         const sB = game.settings.get("Border-Control", "scaleBorder")
         const bS = game.settings.get("Border-Control", "borderGridScale")
         const nBS = bS ? canvas.dimensions.size / 100 : 1
 
-        const s = sB ? this.data.scale : 1
+        const s = sB ? this.scale : 1
         const sW = sB ? (this.w - (this.w * s)) / 2 : 0
         const sH = sB ? (this.h - (this.h * s)) / 2 : 0
 
@@ -164,7 +167,7 @@ export let BorderFrame = class BorderFrame {
             this.border.lineStyle(t * nBS, borderColor.EX, 0.8).drawCircle(this.w / 2, this.h / 2, (this.w / 2) * s + t + p);
             this.border.lineStyle(h * nBS, borderColor.INT, 1.0).drawCircle(this.w / 2, this.h / 2, (this.w / 2) * s + h + t / 2 + p);
         }
-        else if (hexTypes.includes(canvas.grid.type) && (this.data.width === 1) && (this.data.height === 1)) {
+        else if (hexTypes.includes(canvas.grid.type) && (this.width === 1) && (this.height === 1)) {
             const p = game.settings.get("Border-Control", "borderOffset")
             const q = Math.round(p / 2)
             const polygon = canvas.grid.grid.getPolygon(-1.5 - q + sW, -1.5 - q + sH, (this.w + 2) * s + p, (this.h + 2) * s + p);
@@ -188,7 +191,7 @@ export let BorderFrame = class BorderFrame {
     static clamp(value, max, min) {
         return Math.min(Math.max(value, min), max);
     }
-    static newBorderColor() {
+    static newBorderColor({hover}={}) {
 
         const overrides = {
             CONTROLLED: {
@@ -212,100 +215,46 @@ export let BorderFrame = class BorderFrame {
                 EX: parseInt(game.settings.get("Border-Control", "partyColorEx").substr(1), 16),
             },
         }
-        if (this._controlled) return overrides.CONTROLLED;
-        else if (this._hover || game.settings.get("Border-Control", "permanentBorder")) {
+        if (this.controlled){
+            return overrides.CONTROLLED;
+        }
+        // else if ((this._hover || game.settings.get("Border-Control", "permanentBorder"))) {}
+        else if ( (hover ?? this.hover)  || canvas.tokens._highlight || game.settings.get("Border-Control", "permanentBorder")) {
             let disPath = CONST.TOKEN_DISPOSITIONS;
-            let d = parseInt(this.data.disposition);
+            let d = parseInt(this.document.disposition);
             if (!game.user.isGM && this.owner) return overrides.CONTROLLED;
             else if (this.actor?.hasPlayerOwner) return overrides.PARTY;
             else if (d === disPath.FRIENDLY) return overrides.FRIENDLY;
             else if (d === disPath.NEUTRAL) return overrides.NEUTRAL;
             else return overrides.HOSTILE;
         }
-        else return null;
+        else {
+            return null;
+        }
     }
 
-    static newTarget() {
+    static newTarget(reticule) {
+
         const multiplier = game.settings.get("Border-Control", "targetSize");
         const INT = parseInt(game.settings.get("Border-Control", "targetColor").substr(1), 16);
         const EX = parseInt(game.settings.get("Border-Control", "targetColorEx").substr(1), 16);
 
-        this.hud.target.clear();
-        if (!this.targeted.size) return;
-
+        this.target.clear();
+        if ( !this.targeted.size ) return;
+    
         // Determine whether the current user has target and any other users
         const [others, user] = Array.from(this.targeted).partition(u => u === game.user);
-        const userTarget = user.length;
-
-
-
+    
         // For the current user, draw the target arrows
-        if (userTarget) {
-            if (game.settings.get("Border-Control", "internatTarget")) {
-                let p = -4; // padding
-                let aw = -12 * multiplier; // arrow width
-                let h = this.h; // token height
-                let hh = h / 2; // half height
-                let w = this.w; // token width
-                let hw = w / 2; // half width
-                let ah = canvas.dimensions.size / 3 * multiplier;
-                this.hud.target.beginFill(INT, 1.0).lineStyle(1, EX)
-                    .drawPolygon([
-                        -p - aw, hh,
-                        -p, hh - ah,
-                        -p, hh + ah
-                    ])
-                    .drawPolygon([
-                        w + p + aw, hh,
-                        w + p, hh - ah,
-                        w + p, hh + ah
-                    ])
-                    .drawPolygon([
-                        hw, -p - aw,
-                        hw - ah, -p,
-                        hw + ah, -p
-                    ])
-                    .drawPolygon([
-                        hw, h + p + aw,
-                        hw - ah, h + p,
-                        hw + ah, h + p
-                    ]);
-            }
-            else {
-                let p = 4; // padding
-                let aw = 12 * multiplier; // arrow width
-                let h = this.h; // token height
-                let hh = h / 2; // half height
-                let w = this.w; // token width
-                let hw = w / 2; // half width
-                let ah = canvas.dimensions.size / 3 * multiplier;
-                this.hud.target.beginFill(INT, 1.0).lineStyle(1, EX)
-                    .drawPolygon([
-                        -p, hh,
-                        -p - aw, hh - ah,
-                        -p - aw, hh + ah
-                    ])
-                    .drawPolygon([
-                        w + p, hh,
-                        w + p + aw, hh - ah,
-                        w + p + aw, hh + ah
-                    ])
-                    .drawPolygon([
-                        hw, -p, hw - ah,
-                        -p - aw, hw + ah,
-                        -p - aw
-                    ])
-                    .drawPolygon([
-                        hw, h + p,
-                        hw - ah, h + p + aw,
-                        hw + ah, h + p + aw
-                    ]);
-            }
-        }
+        if ( user.length ) this._drawTarget(reticule);
+    
         // For other users, draw offset pips
-        for (let [i, u] of others.entries()) {
-            let color = colorStringToHex(u.data.color);
-            this.hud.target.beginFill(color, 1.0).lineStyle(2, 0x0000000).drawCircle(2 + (i * 8), 0, 6);
+        const hw = this.w / 2;
+        for ( let [i, u] of others.entries() ) {
+          const offset = Math.floor((i+1) / 2) * 16;
+          const sign = i % 2 === 0 ? 1 : -1;
+          const x = hw + (sign * offset);
+          this.target.beginFill(Color.from(u.color), 1.0).lineStyle(2, 0x0000000).drawCircle(x, 0, 6);
         }
     }
 
@@ -358,16 +307,16 @@ export let BorderFrame = class BorderFrame {
     static getActorHpPath() {
         switch (game.system.id) {
             case "symbaroum": return {
-                value: "actor.data.data.health.toughness.value",
-                max: "actor.data.data.health.toughness.max",
+                value: "actor.system.health.toughness.value",
+                max: "actor.system.health.toughness.max",
                 tempMax: undefined,
                 temp: undefined
             }
             case "dnd5e": return {
-                value: "actor.data.data.attributes.hp.value",
-                max: "actor.data.data.attributes.hp.max",
-                tempMax: "actor.data.data.attributes.hp.tempmax",
-                temp: "actor.data.data.attributes.hp.temp"
+                value: "actor.system.attributes.hp.value",
+                max: "actor.system.attributes.hp.max",
+                tempMax: "actor.system.attributes.hp.tempmax",
+                temp: "actor.system.attributes.hp.temp"
             }
         }
     }
@@ -377,7 +326,7 @@ export let BorderFrame = class BorderFrame {
         const yOff = game.settings.get("Border-Control", "nameplateOffset")
         const bOff = game.settings.get("Border-Control", "borderWidth") / 2
         const replaceFont = game.settings.get("Border-Control", "plateFont")
-        let color = game.user.isGM && [10, 40, 20].includes(this.data.displayName) ? game.settings.get("Border-Control", "nameplateColorGM") : game.settings.get("Border-Control", "nameplateColor")
+        let color = game.user.isGM && [10, 40, 20].includes(this.document.displayName) ? game.settings.get("Border-Control", "nameplateColorGM") : game.settings.get("Border-Control", "nameplateColor")
         const sizeMulti = game.settings.get("Border-Control", "sizeMultiplier")
 
         if (game.settings.get("Border-Control", "circularNameplate")) {
@@ -421,7 +370,7 @@ export let BorderFrame = class BorderFrame {
             if (game.settings.get("Border-Control", "plateConsistency")) style.fontSize *= canvas.grid.size / 100
             style.fill = color
 
-            const name = new PreciseText(this.data.name, style);
+            const name = new PreciseText(this.document.name, style);
             name.anchor.set(0.5, 0);
             name.position.set(this.w / 2, this.h + bOff + yOff + offSet);
             return name;
@@ -434,15 +383,37 @@ export let BorderFrame = class BorderFrame {
     }
 
     static drawBars(wrapped, ...args) {
-        if (!game.settings.get("Border-Control", "barAlpha") || !game.user.isGM) return wrapped(...args);
-        if (!this.actor || ([50, 0, 30].includes(this.data.displayBars))) return wrapped(...args);
+        if (!game.settings.get("Border-Control", "barAlpha") || !game.user.isGM) {return wrapped(...args);}
+        if (!this.actor || ([50, 0, 30].includes(this.document.displayBars))) return wrapped(...args);
         else return ["bar1", "bar2"].forEach((b, i) => {
-            const bar = this.hud.bars[b];
+            const bar = this.bars[b];
             const attr = this.document.getBarAttribute(b);
             if (!attr || (attr.type !== "bar")) return bar.visible = false;
             this._drawBar(i, bar, attr);
             bar.visible = true;
             bar.alpha = 0.5
+            this.bars.visible = this._canViewMode(this.document.displayBars);
         });
     }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Draw the targeting arrows around this token.
+   * @param {ReticuleOptions} [reticule]  Additional parameters to configure how the targeting reticule is drawn.
+   * @protected
+   */
+   static _drawTarget({margin: m=0, alpha=1, size=.15, color, border: {width=2, color: lineColor=0}={}}={}) {
+    const l = canvas.dimensions.size * size; // Side length.
+    const {h, w} = this;
+    const lineStyle = {color: lineColor, alpha, width, cap: PIXI.LINE_CAP.ROUND, join: PIXI.LINE_JOIN.BEVEL};
+    color ??= this._getBorderColor({hover: true});
+        
+    m *= l * -1;
+    this.target.beginFill(color.INT, alpha).lineStyle(lineStyle)
+      .drawPolygon([-m, -m, -m-l, -m, -m, -m-l]) // Top left
+      .drawPolygon([w+m, -m, w+m+l, -m, w+m, -m-l]) // Top right
+      .drawPolygon([-m, h+m, -m-l, h+m, -m, h+m+l]) // Bottom left
+      .drawPolygon([w+m, h+m, w+m+l, h+m, w+m, h+m+l]); // Bottom right
+  }
 }

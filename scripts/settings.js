@@ -326,6 +326,7 @@ Hooks.once('init', async function () {
     }
     libWrapper.register('Border-Control', 'Token.prototype._drawNameplate', BorderFrame.drawNameplate, 'OVERRIDE')
     libWrapper.register('Border-Control', 'Token.prototype.drawBars', BorderFrame.drawBars, 'MIXED')
-    
+
+    libWrapper.register('Border-Control', 'Token.prototype._drawTarget', BorderFrame._drawTarget, 'OVERRIDE')
 
 });
